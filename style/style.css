@@ -1,0 +1,39 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --citrus: #f25c54;
+    --light-citrus: #f27059;
+    --mango: #f7b267;
+    --dark-mango: #f79d65;
+    --white: #fff;
+    --dark-grey: #333;
+}
+
+.drag {
+    -webkit-app-region: drag;
+}
+
+.no-drag {
+    -webkit-app-region: no-drag;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+}
+
+.center {text-align: center;}
+.header {
+    font-weight: 400;
+    font-size: 2em;
+}
+.white {color: var(--white);}
+.space-top-40 {padding-top: 40px;}
+
+.center-dv {
+    display: flex;
+    justify-content: center;
+}

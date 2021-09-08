@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style/style.css">
+    <link rel="stylesheet" href="./style/add_work.css">
+    <link rel="stylesheet" href="./style/dashboard.css">
+    <title>Clip Compressor</title>
+</head>
+<body>
+    
+    <section id='settings' style="display: none;"></section>
+
+    <!--
+        Add work page content is for selecting the files to 
+        compress and the proper settings for each file that thge user selects.
+    -->
+
+    <section id='add-work' style="display: none;">
+        <nav>
+            <div class="left-links">
+                <span onclick="toDashboard()" id='back-btn-new-form'>Back</span>
+            </div>
+        </nav>
+
+        <h1 id='new-form-header' class="center header white space-top-40">Select Files to Compress</h1>
+        <div class="center-dv" id='select-folder-btn-area'>
+            <button class="select-folders-btn" onclick="selectFilesButton()">Select</button>
+        </div>
+        <!-- Form To select each files. -->
+
+        <div id="new-file-settings" style="display: none;">
+            <div id="selected"></div>
+            <div id="form-new">
+                <div class="form-elem">
+                    <label for="bitrate">Constant Quality Rate: Range:[10-55]</label>
+                    <p class="hint">Lower Means Higher Quality</p>
+                    <input type="number" onchange="changeBitrate()" value="29" id="bitrate" placeholder="6000" min="10" max="55" step="1">
+                </div>
+
+                <div class="form-elem">
+                    <label for="mute">Mute Audio</label>
+                    <input type="checkbox" onclick="togglemuteBtn()" id="mute">
+                </div>
+
+                <div class="form-elem">
+                    <label id='select-folder-label' for="select-folder">Compressed Destination: none selected</label>
+                    <input type="button" id='select-folder' value="Select Folder" onclick="select_destination()">
+                </div>
+
+                <div class="form-elem">
+                        <input type="button" class="dissabled-start-btn" id='start-work' value="Start" onclick="start_work()">
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!--
+        DASHBOARD PAGE
+        Show the current progress of files being compressed.
+    -->
+
+
+    <section id='dashboard' style="display: none;">
+        <nav>
+            <div class="left-links">
+                <span>Settings</span>
+                <span onclick="toNewWork()">Compress Files</span>
+            </div>
+        </nav>
+
+        <div id="current-progress">
+            
+        </div>
+
+    </section>
+
+    <div id="loading">Installing Required Packages</div>
+
+    <!-------------------------------------------------------------------------------------
+        REQUIRED JAVASCRIPT ON TOP  -->
+
+    <script src="./compiled/app/global.js" defer></script>
+    <script src="./compiled/app/js/main.js" defer></script>
+    <script src="./compiled/app/js/startup.js" defer></script>
+    <!--    Still required but can be loaded later for user experience. -->
+
+    <script src="./compiled/app/js/forms/new_work.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+#dashboard {
+    background-color: var(--white);
+    color: var(--dark-grey);
+    width: 100vw;
+    height: 100vh;
+}
+
+nav {
+    padding: 20px;
+}
+
+.left-links span {
+    margin: 0px 10px;
+    padding: 14px 10px 12px 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    font-size: 1.4em;
+}
+
+.left-links span:hover {
+    border-bottom-color: #ebebeb;
+}
+
+.left-links .active {
+    border-bottom-color: white;   
+}
+
+#current-progress {
+    width: 70vw;
+    margin: 100px auto;
+}

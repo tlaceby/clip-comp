@@ -1,0 +1,118 @@
+#add-work {
+    background-color: var(--citrus);
+    height: 100vh;
+    width: 100vw;
+}
+
+#add-work nav {
+    color: var(--white);
+}
+
+.select-folders-btn {
+    color: var(--white);
+    background: transparent;
+    border: 1px solid var(--white);
+    border-radius: 4px;
+    padding: 22px 40px;
+    cursor: pointer;
+    margin: 40px auto;
+    font-size: 1.4em;
+    font-weight: 100;
+}
+
+.select-folders-btn:hover {
+    color: var(--citrus);
+    background: var(--white);
+}
+
+
+.file-count {
+    color: white;
+    padding-top: 10px;
+}
+
+#selected {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    padding: 10px 10px;
+    width: 90vw;
+}
+
+.file-selected-card {
+    background-color: white;
+    color: #333;
+    padding-top: 4px 8px;
+    border-radius: 3px;
+    margin: 3px 5px;
+    font-size:  .9em;
+}
+
+#form-new {
+    background: white;
+    height: 100%;
+    margin:20px auto;
+    width: 80vw;
+    padding-bottom: 20px;
+}
+
+.form-elem {
+    width: 90%;
+    margin:10px auto;
+    padding-top: 10px;
+}
+
+
+label {
+    font-size: 1.4em;
+    display: block;
+}
+
+#mute, #bitrate {
+    background: white;
+    color: black;
+    outline: none;
+    border: 1px solid #333;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#select-folder{
+    margin: 10px 0px 15px 0px;
+    background: var(--citrus);
+    color: white;
+    outline: none;
+    border: none;
+    padding: 5px 10px;
+    font-size: 1.2em;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.active-start-btn {
+    margin: 10px 0px 15px 0px;
+    background: #5994f2;
+    color: white;
+    outline: none;
+    border: none;
+    padding: 5px 10px;
+    font-size: 1.2em;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.dissabled-start-btn {
+    margin: 10px 0px 15px 0px;
+    background: #2e2e2e;
+    color: white;
+    outline: none;
+    border: none;
+    padding: 5px 10px;
+    font-size: 1.2em;
+    text-align: center;
+    text-decoration: none;
+    cursor: none;
+}

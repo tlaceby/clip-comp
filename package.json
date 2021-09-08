@@ -1,0 +1,31 @@
+{
+  "name": "clip-compressor",
+  "version": "1.0.0",
+  "description": "GUI clip compressor. Compress multiple clips at the same time.",
+  "main": "./compiled/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && electron .",
+    "dev": "concurrently \"tsc -w\" \"electron .\""
+  },
+  "keywords": [],
+  "author": "Tyler Laceby",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/electron-json-storage": "^4.5.0",
+    "@types/ffmpeg-static": "^3.0.0",
+    "@types/fluent-ffmpeg": "^2.1.18",
+    "@types/node": "^16.7.13",
+    "concurrently": "^6.2.1",
+    "typescript": "^4.4.2"
+  },
+  "dependencies": {
+    "electron": "^14.0.0",
+    "electron-json-storage": "^4.5.0",
+    "electron-reload": "^2.0.0-alpha.1",
+    "ffmpeg-static": "^4.4.0",
+    "file-type": "^16.5.3",
+    "fluent-ffmpeg": "^2.1.2",
+    "read-chunk": "^4.0.2"
+  }
+}
