@@ -31,6 +31,7 @@ app.whenReady().then(async () => {
 
 function setWindowNormalSize () {   
     window.setSize(1120, 870);
+    window.center();
 }
 
 async function main () {
