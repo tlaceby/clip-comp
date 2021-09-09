@@ -51,7 +51,6 @@
                     <select id="speed" onchange="changeSpeed()">
                         <option value="veryslow" selected='true'>Very Slow</option>
                         <option value="slow">Slow</option>
-                        <option value="medium">Medium</option>
                       </select>
                 </div>
 
@@ -83,7 +82,7 @@
     -->
 
 
-    <section id='dashboard' style="display: none;">
+    <section id='dashboard'>
         <nav>
             <div class="left-links">
                 <span>Settings</span>
@@ -100,14 +99,11 @@
 
     </section>
 
-    <div id="loading">Installing Required Packages</div>
-
     <!-------------------------------------------------------------------------------------
         REQUIRED JAVASCRIPT ON TOP  -->
 
     <script src="./compiled/app/global.js" defer></script>
     <script src="./compiled/app/js/main.js" defer></script>
-    <script src="./compiled/app/js/startup.js" defer></script>
     <!--    Still required but can be loaded later for user experience. -->
 
     <script src="./compiled/app/js/forms/new_work.js" defer></script>

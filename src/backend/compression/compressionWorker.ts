@@ -68,11 +68,13 @@ async function compressCLI (options: WorkProperties) {
         let cmd = ffmpeg_binary;
         let mutedFlag = "-an";
 
-        let ffmpegOptions= [
+        console.log(options.settings)
+
+        let ffmpegOptions = [
             '-i', options.file.path,
             "-c:v", "libx264", 
             "-crf", `${options.settings.bitrate}`, // 29
-            "-preset", options.settings.speed, // slow , veryslow, fast veryfast, medium
+            "-preset", "veryslow", // slow , veryslow, fast veryfast, medium
             "-s", options.settings.resolution, newPath
         ];
 
@@ -80,7 +82,7 @@ async function compressCLI (options: WorkProperties) {
             '-i', options.file.path,
             "-c:v", "libx264", 
             "-crf", `${options.settings.bitrate}`, // 29
-            "-preset", options.settings.speed, // slow , veryslow, fast veryfast, medium
+            "-preset", "veryslow", // slow , veryslow, fast veryfast, medium
             "-s", options.settings.resolution, mutedFlag, '-progress', '-nostat', newPath,
         ];
 
@@ -105,7 +107,7 @@ async function compressCLI (options: WorkProperties) {
                 if (frameOn && process.send) {
                     let differenceInSendTimes = Date.now() - lastSentUpdate;
 
-                    if (differenceInSendTimes > 1200) {
+                    if (differenceInSendTimes > 1700) {
                         lastSentUpdate = Date.now()
                         process.send({completed: false, err: false, frameCompleted: frameOn});
                     }

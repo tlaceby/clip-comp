@@ -26,9 +26,7 @@ electronReload(join(__dirname, '..'), {});
 let window: BrowserWindow;
 
 app.whenReady().then(async () => {
-    // storage.clear((e) => {
-    //     main()
-    // })
+    await checkForValidInstall();
     main()
 });
 

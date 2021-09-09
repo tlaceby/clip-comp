@@ -1,12 +1,12 @@
 const STATUS_DIV = document.getElementById("status-div") || document.createElement("div");
 
-app.compress.on("/work-update/starting-new", (data: WorkProperties[]) => updateDashboardView(data));
+app.compress.on("/work-update/starting-new", updateDashboardView);
 app.compress.on("/work-update/all-done", allDone);
 app.compress.on("/update-progress", updateProgressBar);
 
-async function updateDashboardView (queue: WorkProperties[]) {
-    console.log(queue[0].file.name + " is currently being compressed\n");
-    STATUS_DIV.innerHTML = "";
+function updateDashboardView (queue: WorkProperties[]) {
+
+    STATUS_DIV.innerHTML = '';
 
     const currently_being_worked = currentlyBeingWorkedCard(queue[0]);
     STATUS_DIV.appendChild(currently_being_worked);
@@ -115,7 +115,6 @@ function updateProgressBar (progress: number) {
     const inner = document.getElementById("current-progress-inner")
 
     if (parent && inner) {
-        console.log(progress);
         const outerWidth = parent.clientWidth;
         const innerWidthNew = outerWidth * progress;
 
