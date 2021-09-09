@@ -288,7 +288,7 @@ async function installFFPROBE () {
 
 
 // Updater Stuffz
-
+setTimeout(autoUpdater.checkForUpdatesAndNotify, 5000);
 // Check for application update every 30s
 setInterval(() => {
     try {
