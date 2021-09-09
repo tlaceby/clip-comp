@@ -1,12 +1,34 @@
 {
-  "name": "clip-compressor",
+  "name": "clipz",
   "version": "1.0.0",
-  "description": "GUI clip compressor. Compress multiple clips at the same time.",
+  "description": "GUI For easier and faster compression of video clips. Uses FFMPEG under the hood.",
   "main": "./compiled/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && electron .",
-    "dev": "concurrently \"tsc -w\" \"electron .\""
+    "pack": "npm install && npm run make",
+    "make": "npm run build && electron-builder",
+    "start": "tsc && electron .",
+    "deploy": "npm run pack && tsc && electron-builder build --win --publish always"
+  }, "repository": {
+    "type": "git",
+    "url": "https://github.com/tylerbadger23/clip-comp.git"
+  },
+  "build": {
+    "appId": "clipz",
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "uninstallDisplayName": "clipz",
+      "license": "readme.md",
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "keywords": [],
   "author": "Tyler Laceby",
@@ -17,20 +39,18 @@
     "@types/ffprobe": "^1.1.2",
     "@types/fluent-ffmpeg": "^2.1.18",
     "@types/node": "^16.7.13",
-    "concurrently": "^6.2.1",
-    "typescript": "^4.4.2"
+    "typescript": "^4.4.2",
+    "electron-builder": "^22.11.7",
+    "electron": "^14.0.0"
   },
   "dependencies": {
+    "electron-updater": "^4.3.9",
     "@types/ffprobe-static": "^2.0.0",
-    "electron": "^14.0.0",
     "electron-json-storage": "^4.5.0",
-    "electron-reload": "^2.0.0-alpha.1",
-    "ffmpeg-static": "^4.4.0",
     "ffprobe": "^1.1.2",
     "ffprobe-static": "^3.0.0",
     "ffprobe-static-electron": "^2.0.2",
     "file-type": "^16.5.3",
-    "fluent-ffmpeg": "^2.1.2",
     "read-chunk": "^4.0.2"
   }
 }

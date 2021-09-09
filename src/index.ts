@@ -2,7 +2,6 @@ import { app, ipcMain, BrowserWindow } from "electron";
 import * as storage from "electron-json-storage";
 import { createWriteStream } from "fs";
 import { join } from "path";
-import electronReload from "electron-reload";
 import {user_select_multiple_files, user_select_destination} from "./backend/dialog/user_select";
 import { check_files_for_valid_type } from "./backend/file/checks";
 // import "./backend/compression/compressin_handler";
@@ -16,12 +15,15 @@ import * as ffprobeLoaction from "ffprobe-static";
 const pathToFfmpeg = process.env.APPDATA + "/ffmpeg.exe";
 const events = new EventEmitter();
 const work = new Work_Queue();
+import { autoUpdater } from 'electron-updater';
+autoUpdater.autoInstallOnAppQuit = true;
 
 events.addListener("work/finished-compressing", onFinished);
 events.addListener("work/started-compression", onStartingNewWork);
 
 const FFMPEG_LOCATION_HTTPS = "https://clip-compressor.herokuapp.com/download/win";
-electronReload(join(__dirname, '..'), {});
+// import electronReload from "electron-reload";
+// electronReload(join(__dirname, '..'), {});
 
 let window: BrowserWindow;
 
@@ -155,7 +157,7 @@ async function compressFile (file: WorkProperties) {
             });
 
             thread.on("message", (message: {completed: boolean, err: boolean, frameCompleted: number}) => {
-                console.log(message);
+                
                 if (message.completed && !message.err) {
                     thread.kill();
                     res(file);
@@ -163,11 +165,9 @@ async function compressFile (file: WorkProperties) {
                     res(file)
                     thread.kill();
                 } else {    
-                    if (window.webContents.send) {
-                        
-                        const progress = message.frameCompleted / totalFrames;
-                        window.webContents.send("/update-progress", progress);
-                    }
+                     
+                    const progress = message.frameCompleted / totalFrames;
+                    window.webContents.send("/update-progress", progress);
                 }
             });
             
@@ -238,3 +238,27 @@ async function installFFMPEG () {
             });
     })
 }
+
+
+
+
+// Updater Stuffz
+
+// Check for application update every 30s
+setInterval(() => {
+    try {
+        autoUpdater.checkForUpdatesAndNotify();
+    } catch(err) {
+        console.log(err);
+        console.log('failed to search for autoUpdater')
+    }
+    
+}, 30000)
+
+autoUpdater.on("update-downloaded", (e) => {
+    window.webContents.send("update-downloaded", "an update was downloaded and will be installed when you restart the app.")
+});
+
+autoUpdater.on("update-available", (e) => {
+    window.webContents.send("update-found", "starting update now")
+});

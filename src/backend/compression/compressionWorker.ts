@@ -74,7 +74,7 @@ async function compressCLI (options: WorkProperties) {
             '-i', options.file.path,
             "-c:v", "libx264", 
             "-crf", `${options.settings.bitrate}`, // 29
-            "-preset", "veryslow", // slow , veryslow, fast veryfast, medium
+            "-preset", options.settings.speed, // slow , veryslow, fast veryfast, medium
             "-s", options.settings.resolution, newPath
         ];
 
@@ -82,7 +82,7 @@ async function compressCLI (options: WorkProperties) {
             '-i', options.file.path,
             "-c:v", "libx264", 
             "-crf", `${options.settings.bitrate}`, // 29
-            "-preset", "veryslow", // slow , veryslow, fast veryfast, medium
+            "-preset", options.settings.speed, // slow , veryslow, fast veryfast, medium
             "-s", options.settings.resolution, mutedFlag, '-progress', '-nostat', newPath,
         ];
 
@@ -97,7 +97,7 @@ async function compressCLI (options: WorkProperties) {
 
         proc.stderr.setEncoding("utf8")
         proc.stderr.on('data', function(d: string) {
-            // console.log(data);
+            
             let data = d.split("=")
             if (data.length > 1) {
                 let frameArg = data[1];
@@ -107,7 +107,7 @@ async function compressCLI (options: WorkProperties) {
                 if (frameOn && process.send) {
                     let differenceInSendTimes = Date.now() - lastSentUpdate;
 
-                    if (differenceInSendTimes > 1700) {
+                    if (differenceInSendTimes > 400) {
                         lastSentUpdate = Date.now()
                         process.send({completed: false, err: false, frameCompleted: frameOn});
                     }

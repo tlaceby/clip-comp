@@ -86,7 +86,7 @@ function currentlyBeingWorkedCard(work: WorkProperties) {
     const innerBar = document.createElement("div");
     innerBar.id = "current-progress-inner";
     innerBar.classList.add("current-progress-inner");
-    innerBar.innerText = `40%`;
+    innerBar.innerText = ``;
 
     outerBar.appendChild(innerBar);
 

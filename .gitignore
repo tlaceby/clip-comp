@@ -1,2 +1,4 @@
 compiled/
 node_modules/
+dist/
+-nostat
