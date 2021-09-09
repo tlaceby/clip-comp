@@ -11,6 +11,8 @@ import { Work_Queue } from "./backend/compression/workQueue";
 import EventEmitter from "events";
 import { ChildProcess, fork } from "child_process";
 import { existsSync } from "fs";
+import ffprobe from "ffprobe";
+import * as ffprobeLoaction from "ffprobe-static";
 const pathToFfmpeg = process.env.APPDATA + "/ffmpeg.exe";
 const events = new EventEmitter();
 const work = new Work_Queue();
@@ -118,8 +120,11 @@ async function onFinished (finished: WorkProperties) {
 }
 
 async function onStartingNewWork (current: WorkProperties) {
-    window.webContents.send("/work-update/starting-new", work.get())
-    console.log("\nstatus - size: " + work.count + "\n");
+    try {
+        window.webContents.send("/work-update/starting-new", work.get())
+    } catch (err) {
+        console.log(err);
+    }
     console.log("starting... \n");
 
     let compressionTask = compressFile(current);
@@ -138,16 +143,34 @@ async function onStartingNewWork (current: WorkProperties) {
 async function compressFile (file: WorkProperties) {
     return new Promise<WorkProperties>((res, rej) => {
         const thread = fork(__dirname + "/backend/compression/compressionWorker");
+        let totalFrames = 0;
 
         if (existsSync(pathToFfmpeg)) { 
+            ffprobe(file.file.path, ({path: ffprobeLoaction.path}), (err, info) => {
+                if (err) console.log(err);
+                else {
+                    totalFrames = info.streams[0].nb_frames || 0;
+                    
+                }
 
-            thread.send({data: file});
+                thread.send({data: file});
+            });
 
-            thread.on("message", (message: {completed: boolean, err: boolean}) => {
-                if (message.completed) {
+            thread.on("message", (message: {completed: boolean, err: boolean, frameCompleted: number}) => {
+                console.log(message);
+                if (message.completed && !message.err) {
                     thread.kill();
                     res(file);
-                } 
+                } else if (!message.completed && message.err){
+                    res(file)
+                    thread.kill();
+                } else {    
+                    if (window.webContents.send) {
+                        
+                        const progress = message.frameCompleted / totalFrames;
+                        window.webContents.send("/update-progress", progress);
+                    }
+                }
             });
             
             thread.on("error", (error) => {

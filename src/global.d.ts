@@ -29,4 +29,4 @@ interface FileDetails {
 }
 
 
-type CompressorUpdateEvents = "/work-update/starting-new"|  "/work-update/one-done" | "/work-update/all-done";
+type CompressorUpdateEvents = "/work-update/starting-new"|  "/work-update/one-done" | "/work-update/all-done" | "/update-progress";
