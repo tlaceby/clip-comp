@@ -4,6 +4,9 @@ app.compress.on("/work-update/starting-new", updateDashboardView);
 app.compress.on("/work-update/all-done", allDone);
 app.compress.on("/update-progress", updateProgressBar);
 
+
+startup();
+
 function updateDashboardView (queue: WorkProperties[]) {
 
     STATUS_DIV.innerHTML = '';
@@ -153,5 +156,16 @@ function getRandomIntInclusive(min: number, max: number) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
-  }
+}
+
+
+async function startup () {
+    let ffmpegLocation = await app.app.ffmpegInstall();
+    console.log("installed ffmpeg \n starting install of ffprobe");
+    let ffprobeLocation = await app.app.ffprobegInstall();
+
+    console.log("ffprobe and ffmpeg are installed.");
+    LOADING.style.display = "none";
+    DASHBOARD.style.display = "block";
+}
   

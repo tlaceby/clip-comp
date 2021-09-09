@@ -26,17 +26,18 @@ const pathToFfmpeg = process.env.APPDATA + "\\ffmpeg.exe";
 let window: BrowserWindow;
 
 app.whenReady().then(async () => {
-    // await checkForValidFFMPEGInstall();
-    // await checkForValidFFPROBEInstall();
-    storage.clear(main); // dev only 
-    // main()
+    main();
 });
+
+function setWindowNormalSize () {   
+    window.setSize(1120, 870);
+}
 
 async function main () {
 
     window = new BrowserWindow({
         icon: "icon.ico",
-        width: 1120, height: 870,
+        width: 350, height: 300,
         show: false,
         autoHideMenuBar: true,
         webPreferences: {
@@ -187,6 +188,9 @@ ipcMain.handle("get/valid-install-ffmpeg", async() => {
 
 ipcMain.handle("get/valid-install-ffprobe", async() => {
     let installedPath = await checkForValidFFPROBEInstall();
+
+
+    setWindowNormalSize()
     return installedPath;
 })
 
