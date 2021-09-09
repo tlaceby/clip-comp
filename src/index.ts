@@ -1,5 +1,5 @@
 import { app, ipcMain, BrowserWindow } from "electron";
-import * as storage from "electron-json-storage";
+import * as storage from "electron-json-storage"
 import { createWriteStream } from "fs";
 import { join } from "path";
 import {user_select_multiple_files, user_select_destination} from "./backend/dialog/user_select";
@@ -26,10 +26,10 @@ const pathToFfmpeg = process.env.APPDATA + "\\ffmpeg.exe";
 let window: BrowserWindow;
 
 app.whenReady().then(async () => {
-    await checkForValidFFMPEGInstall();
-    await checkForValidFFPROBEInstall();
-    // dev only storage.clear(main);
-    main()
+    // await checkForValidFFMPEGInstall();
+    // await checkForValidFFPROBEInstall();
+    storage.clear(main); // dev only 
+    // main()
 });
 
 async function main () {
@@ -307,5 +307,4 @@ autoUpdater.on("update-available", (e) => {
 
 function log (message: any, type?: ipcLog) {
     window.webContents.send("debug-log", {message: message, type: type || "default"});
-    log("[Update Downloaded]: Will install on qpplication exit.", "default");
 }
