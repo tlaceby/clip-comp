@@ -1,6 +1,6 @@
 {
   "name": "clipz",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "GUI For easier and faster compression of video clips. Uses FFMPEG under the hood.",
   "main": "./compiled/index.js",
   "scripts": {

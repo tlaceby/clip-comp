@@ -13,7 +13,6 @@ import { existsSync } from "fs";
 const events = new EventEmitter();
 const work = new Work_Queue();
 import { autoUpdater } from 'electron-updater';
-autoUpdater.autoInstallOnAppQuit = true;
 
 events.addListener("work/finished-compressing", onFinished);
 events.addListener("work/started-compression", onStartingNewWork);
@@ -26,6 +25,20 @@ const pathToFfmpeg = process.env.APPDATA + "\\ffmpeg.exe";
 let window: BrowserWindow;
 
 app.whenReady().then(async () => {
+    autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = true;
+    // Updater Stuffz
+    setTimeout(autoUpdater.checkForUpdatesAndNotify, 5000);
+    // Check for application update every 30s
+    setInterval(() => {
+        try {
+            autoUpdater.checkForUpdatesAndNotify();
+        } catch(err) {
+            console.log(err);
+            log("error with autoupdater.", "error")
+        }
+        
+    }, 30000)
     main();
 });
 
@@ -285,21 +298,6 @@ async function installFFPROBE () {
     })
 }
 
-
-
-
-// Updater Stuffz
-setTimeout(autoUpdater.checkForUpdatesAndNotify, 5000);
-// Check for application update every 30s
-setInterval(() => {
-    try {
-        autoUpdater.checkForUpdatesAndNotify();
-    } catch(err) {
-        console.log(err);
-        console.log('failed to search for autoUpdater')
-    }
-    
-}, 30000)
 
 autoUpdater.on("update-downloaded", (e) => {
     window.webContents.send("update-downloaded", "an update was downloaded and will be installed when you restart the app.")
