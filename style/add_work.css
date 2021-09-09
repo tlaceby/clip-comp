@@ -8,6 +8,24 @@
     color: var(--white);
 }
 
+input[type='checkbox'] {
+    margin: 10px 0px 3px 15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    border: 2px solid var(--citrus)
+}
+
+select {
+    border-radius: 4px;
+    border: 1px solid black;
+    color: black;
+    cursor: pointer;
+    padding: 10px 20px;
+    outline: none;
+    text-decoration: none;
+}
+
 .select-folders-btn {
     color: var(--white);
     background: transparent;

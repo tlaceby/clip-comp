@@ -1,8 +1,12 @@
+type CompressionResolution = "1280x720" | "1920x1080";
+type CompressionSpeed = "veryslow" | "slow" | "medium" | "fast" | "veryfast";
 
 interface CompressionSettings {
     bitrate: number,
     mute: boolean,
-    ext?: string,
+    speed: CompressionSpeed;
+    resolution: CompressionResolution,
+    ext: string,
     new_path?: string
 }
 
@@ -23,3 +27,6 @@ interface FileDetails {
     ext: string,
     mime: string
 }
+
+
+type CompressorUpdateEvents = "/work-update/starting-new"|  "/work-update/one-done" | "/work-update/all-done";

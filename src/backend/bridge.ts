@@ -25,6 +25,7 @@ const _window = {
 
 
 const compressor = {
+    on: (eventname: CompressorUpdateEvents, callback: Function) => ipcRenderer.on(eventname, (_, data) => callback(data)),
     addWork: (files: WorkProperties[]) => ipcRenderer.invoke("push/compression/new-work", files),
     getStatus: (workID: string) => ipcRenderer.invoke("get/compression/work-status", workID),
 }

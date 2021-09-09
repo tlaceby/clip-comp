@@ -64,20 +64,30 @@ async function compressFile (options: WorkProperties) {
 async function compressCLI (options: WorkProperties) {
 
     return new Promise<boolean>((res, rej) =>{
-        let newPath = options.settings.new_path + "\\" + options.file.name;
+        let newPath = options.settings.new_path + `\\${options.settings.ext}${options.file.name}`;
         let cmd = ffmpeg_binary;
+        let mutedFlag = "-an";
+        console.log(options.settings)
 
-        console.log(options.settings.bitrate)
-        let BEST_BY_FAR = [
+        let ffmpegOptions= [
             '-i', options.file.path,
             "-c:v", "libx264", 
             "-crf", `${options.settings.bitrate}`, // 29
-            "-preset", "veryslow", // slow , veryslow, fast veryfast, medium
-            "-s","1280x720",
-            "-c:a", "copy", newPath
+            "-preset", options.settings.speed, // slow , veryslow, fast veryfast, medium
+            "-s", options.settings.resolution, newPath
         ];
 
-        let proc = spawn(cmd, BEST_BY_FAR);
+        let ffmpegOptionsMuted = [
+            '-i', options.file.path,
+            "-c:v", "libx264", 
+            "-crf", `${options.settings.bitrate}`, // 29
+            "-preset", options.settings.speed, // slow , veryslow, fast veryfast, medium
+            "-s", options.settings.resolution, mutedFlag, newPath
+        ];
+
+        let optionsToUse = (options.settings.mute)? ffmpegOptionsMuted : ffmpegOptions;
+
+        let proc = spawn(cmd, optionsToUse);
 
         proc.stdout.on('data', function(data) {
             console.log(data);

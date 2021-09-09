@@ -16,6 +16,13 @@
     -webkit-app-region: drag;
 }
 
+.hint {
+    padding: 5px;
+    font-size: 1.1em;
+    font-weight: 100;
+    color: rgb(22, 22, 22);
+}
+
 .no-drag {
     -webkit-app-region: no-drag;
 }
@@ -37,3 +44,26 @@ body {
     display: flex;
     justify-content: center;
 }
+
+
+
+/* width */
+::-webkit-scrollbar {
+    width: 1px;
+    height: 1px;
+}
+  
+  /* Track */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+  
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: transparent;
+  }

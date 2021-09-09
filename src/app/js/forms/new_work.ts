@@ -1,12 +1,14 @@
 const back_btn_frm = document.getElementById("back-btn-new-form") || document.createElement("span");
 const SELECTED_FILES = document.getElementById("selected") || document.createElement("div");
 const START_WORK_BTN = document.getElementById("start-work") || document.createElement("button");
-
+const mutebtn = document.getElementById("mute")
 
 let new_work_selected_paths: FileDetails[] = [];
 let currentSettingsState: CompressionSettings = {
     bitrate: 29, 
-    ext: "--compressed", 
+    ext: "--compressed--", 
+    speed: "veryslow",
+    resolution: "1280x720",
     mute: false,
     new_path: undefined
 }
@@ -21,6 +23,32 @@ function changeBitrate () {
         if (typeof currentSettingsState.bitrate !== "number") alert("must be number")
         allowStart()
     }
+}
+
+function changeResolution () {
+    const resolution = document.getElementById("resolution");
+    // @ts-ignore
+    const res = resolution.value;
+
+    if (res == "1280x720" || res == "1920x1080") {
+        allowStart()
+        currentSettingsState.resolution = res;
+    }
+    else currentSettingsState.resolution = "1280x720";
+
+}
+
+function changeSpeed () {
+    const speed = document.getElementById("speed");
+    // @ts-ignore
+    const com_speed = speed.value;
+
+    if (com_speed == "slow" || com_speed == "veryslow" || com_speed == "medium" || com_speed == "fast" || com_speed == "veryfast") {
+        allowStart()
+        currentSettingsState.speed = com_speed;
+    }
+    else currentSettingsState.speed = "veryslow";
+
 }
 
 async function select_destination() {
@@ -76,11 +104,16 @@ function clearNewWorkForm () {
     NEW_FORM_H1.innerText = "Select Files to Compress";
 
     currentSettingsState = {
-        bitrate: 5000, 
-        ext: "--compressed", 
+        bitrate: 29, 
+        ext: "compressed--", 
+        speed: currentSettingsState.speed,
+        resolution: currentSettingsState.resolution,
         mute: false,
         new_path: undefined
     }
+
+    //@ts-ignore
+    mutebtn.checked = false;
 }
 
 function show_selected_file_card (file: FileDetails) {

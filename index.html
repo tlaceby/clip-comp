@@ -25,7 +25,7 @@
             </div>
         </nav>
 
-        <h1 id='new-form-header' class="center header white space-top-40">Select Files to Compress</h1>
+        <h1 id='new-form-header' class="center header white">Select Files to Compress</h1>
         <div class="center-dv" id='select-folder-btn-area'>
             <button class="select-folders-btn" onclick="selectFilesButton()">Select</button>
         </div>
@@ -43,6 +43,26 @@
                 <div class="form-elem">
                     <label for="mute">Mute Audio</label>
                     <input type="checkbox" onclick="togglemuteBtn()" id="mute">
+                </div>
+
+                <div class="form-elem">
+                    <label for="speed">Compression Speed</label>
+                    <p class="hint">The slower the speed the more time the algorithm will have to compress with less loss and smaller file size.</p>
+                    <select id="speed" onchange="changeSpeed()">
+                        <option value="veryslow" selected='true'>Very Slow</option>
+                        <option value="slow">Slow</option>
+                        <option value="medium">Medium</option>
+                        <option value="fast">Fast</option>
+                        <option value="veryfast">Very Fast</option>
+                      </select>
+                </div>
+
+                <div class="form-elem">
+                    <label for="resolution">Resolution</label>
+                    <select id="resolution" onchange="changeResolution()">
+                        <option value="1920x1080">1080p</option>
+                        <option value="1280x720" selected='true'>720p</option>
+                    </select>
                 </div>
 
                 <div class="form-elem">
@@ -74,7 +94,10 @@
         </nav>
 
         <div id="current-progress">
-            
+            <h1>Currently Being Compressed:</h1>
+            <div id="status-div">
+                
+            </div>
         </div>
 
     </section>

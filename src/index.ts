@@ -5,11 +5,23 @@ import { join } from "path";
 import electronReload from "electron-reload";
 import {user_select_multiple_files, user_select_destination} from "./backend/dialog/user_select";
 import { check_files_for_valid_type } from "./backend/file/checks";
-import "./backend/compression/compressin_handler";
+// import "./backend/compression/compressin_handler";
 import { get } from "https";
+import { Work_Queue } from "./backend/compression/workQueue";
+import EventEmitter from "events";
+import { ChildProcess, fork } from "child_process";
+import { existsSync } from "fs";
+const pathToFfmpeg = process.env.APPDATA + "/ffmpeg.exe";
+const events = new EventEmitter();
+const work = new Work_Queue();
+
+events.addListener("work/finished-compressing", onFinished);
+events.addListener("work/started-compression", onStartingNewWork);
 
 const FFMPEG_LOCATION_HTTPS = "https://clip-compressor.herokuapp.com/download/win";
 electronReload(join(__dirname, '..'), {});
+
+let window: BrowserWindow;
 
 app.whenReady().then(async () => {
     // storage.clear((e) => {
@@ -20,7 +32,7 @@ app.whenReady().then(async () => {
 
 async function main () {
 
-    const window = new BrowserWindow({
+    window = new BrowserWindow({
         icon: "icon.ico",
         width: 800, height: 650,
         show: false,
@@ -77,6 +89,79 @@ ipcMain.handle("user/select/destination", async () => {
     if (user_selected.canceled || user_selected.filePaths.length == 0) return undefined;
     else return user_selected.filePaths;
 });
+
+///Work QUEUE
+ipcMain.handle("push/compression/new-work", async (_, work_data: WorkProperties[]) => {
+    let previousSize = work.count;
+    let all = work.push(work_data);
+
+    // means no work is being done.
+    if (previousSize === 0) {
+        events.emit("work/started-compression", work.current);
+    }
+
+    return all;
+});
+
+
+async function onFinished (finished: WorkProperties) {
+    let nextToDo = work.next();
+    if (nextToDo) events.emit("work/started-compression", work.current);
+
+    console.log("Queue Count: " + work.count)
+
+
+
+    if (work.count > 0) {
+        window.webContents.send("/work-update/one-done", work.get());
+    } else window.webContents.send("/work-update/all-done", work.get());
+}
+
+async function onStartingNewWork (current: WorkProperties) {
+    window.webContents.send("/work-update/starting-new", work.get())
+    console.log("\nstatus - size: " + work.count + "\n");
+    console.log("starting... \n");
+
+    let compressionTask = compressFile(current);
+
+    compressionTask.then((finished) => {
+        events.emit("work/finished-compressing", finished);
+    })
+
+    compressionTask.catch((err) => {
+        events.emit("work/finished-compressing", current);
+        console.log("FAILED TOP Compress FILE" + err)
+    })
+}
+
+
+async function compressFile (file: WorkProperties) {
+    return new Promise<WorkProperties>((res, rej) => {
+        const thread = fork(__dirname + "/backend/compression/compressionWorker");
+
+        if (existsSync(pathToFfmpeg)) { 
+
+            thread.send({data: file});
+
+            thread.on("message", (message: {completed: boolean, err: boolean}) => {
+                if (message.completed) {
+                    thread.kill();
+                    res(file);
+                } 
+            });
+            
+            thread.on("error", (error) => {
+                console.log(error);
+                rej(error);
+            });
+            
+            thread.on("exit", (exitCode) => {
+                console.log(`Process: exited ecode: ${exitCode}`);
+            });
+
+        }
+    })
+}
 
 
 ipcMain.handle("get/valid-install", async() => {

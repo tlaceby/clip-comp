@@ -1,4 +1,4 @@
-import { ipcMain } from "electron";
+import { BrowserWindow, ipcMain } from "electron";
 import { Work_Queue } from "./workQueue";
 import EventEmitter from "events";
 import { ChildProcess, fork } from "child_process";
@@ -10,7 +10,15 @@ const work = new Work_Queue();
 events.addListener("work/finished-compressing", onFinished);
 events.addListener("work/started-compression", onStartingNewWork);
 
+export default async function HandleCompressionEvents (win: BrowserWindow) {
+    const window = win;
 
+
+    
+
+
+
+}
 
 ipcMain.handle("push/compression/new-work", async (_, work_data: WorkProperties[]) => {
     let previousSize = work.count;
