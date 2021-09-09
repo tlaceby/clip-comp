@@ -1,5 +1,5 @@
 const STATUS_DIV = document.getElementById("status-div") || document.createElement("div");
-
+app.app.onLog();
 app.compress.on("/work-update/starting-new", updateDashboardView);
 app.compress.on("/work-update/all-done", allDone);
 app.compress.on("/update-progress", updateProgressBar);
@@ -39,7 +39,10 @@ function generateWorkCardStatus (work: WorkProperties, index: number) {
 
     const spotinqueue = document.createElement("h3");
     spotinqueue.classList.add("current-work-size-before");
-    spotinqueue.innerHTML = `Queue Position: <strong class='size-tag'>${index}</strong>`;
+
+    const sayNext = (index == 1)? "next" : index;
+
+    spotinqueue.innerHTML = `Queue Position: <strong class='size-tag'>${sayNext}</strong>`;
 
 
     // Add each inner node to parent
@@ -52,6 +55,7 @@ function generateWorkCardStatus (work: WorkProperties, index: number) {
 
 
 function currentlyBeingWorkedCard(work: WorkProperties) {
+    const spinnerColor = randomSpinnerColor();
     const card = document.createElement("div");
     card.classList.add("status-card-current");
 
@@ -76,16 +80,18 @@ function currentlyBeingWorkedCard(work: WorkProperties) {
 
     const sizeBeforeCompression = document.createElement("h3");
     sizeBeforeCompression.classList.add("current-work-size-before");
-    sizeBeforeCompression.innerHTML = `Size: <strong class='size-tag'>${work.file.size_mb}</strong>`;
+    sizeBeforeCompression.innerHTML = `Size: <strong class='size-tag' style='color: ${spinnerColor};'>${work.file.size_mb}</strong>`;
 
     const outerBar = document.createElement("div");
     outerBar.id = "current-progress-outer";
-    outerBar.classList.add("current-progress-outer")
+    outerBar.classList.add("loader");
+
+    outerBar.style.borderTopColor = spinnerColor;
 
 
     const innerBar = document.createElement("div");
     innerBar.id = "current-progress-inner";
-    innerBar.classList.add("current-progress-inner");
+     // innerBar.classList.add("current-progress-inner");
     innerBar.innerText = ``;
 
     outerBar.appendChild(innerBar);
@@ -114,7 +120,8 @@ function updateProgressBar (progress: number) {
     const parent = document.getElementById("current-progress-outer")
     const inner = document.getElementById("current-progress-inner")
 
-    if (parent && inner) {
+
+    if (typeof progress == "number" && parent && inner) {
         const outerWidth = parent.clientWidth;
         const innerWidthNew = outerWidth * progress;
 
@@ -122,5 +129,29 @@ function updateProgressBar (progress: number) {
         inner.style.width = `${innerWidthNew}px`;
         inner.innerText = `${(progress * 100).toFixed(1)}%`
 
+    } else {
+        if (parent && inner) {
+            parent.classList.remove("current-progress-outer");
+            inner.classList.remove("current-progress-inner");
+
+            parent.classList.add("loader");
+        }
     }
 }
+
+
+function randomSpinnerColor () {
+    let c = "";
+
+    const colors = ['#f25c54', "#f27059", "#546cf2", "#545ff2", "#222", "#61f254"];
+
+    c = colors[getRandomIntInclusive(0, colors.length - 1)];
+    return c;
+}
+
+function getRandomIntInclusive(min: number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
+  }
+  

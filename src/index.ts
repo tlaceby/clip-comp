@@ -5,14 +5,11 @@ import { join } from "path";
 import {user_select_multiple_files, user_select_destination} from "./backend/dialog/user_select";
 import { check_files_for_valid_type } from "./backend/file/checks";
 // import "./backend/compression/compressin_handler";
-import { get } from "https";
+import { get } from "https"; 
 import { Work_Queue } from "./backend/compression/workQueue";
 import EventEmitter from "events";
 import { ChildProcess, fork } from "child_process";
 import { existsSync } from "fs";
-import ffprobe from "ffprobe";
-import * as ffprobeLoaction from "ffprobe-static";
-const pathToFfmpeg = process.env.APPDATA + "/ffmpeg.exe";
 const events = new EventEmitter();
 const work = new Work_Queue();
 import { autoUpdater } from 'electron-updater';
@@ -21,14 +18,17 @@ autoUpdater.autoInstallOnAppQuit = true;
 events.addListener("work/finished-compressing", onFinished);
 events.addListener("work/started-compression", onStartingNewWork);
 
+const FFPROBE_LOCATION_HTTPS = 'https://drive.google.com/u/1/uc?export=download&confirm=4uyB&id=1gBIu5E-uuqdeTslwzjVpq3d9_C3ulVPV'
 const FFMPEG_LOCATION_HTTPS = "https://clip-compressor.herokuapp.com/download/win";
-// import electronReload from "electron-reload";
-// electronReload(join(__dirname, '..'), {});
+const pathToFfprobe = process.env.APPDATA + "\\ffprobe.exe";
+const pathToFfmpeg = process.env.APPDATA + "\\ffmpeg.exe";
 
 let window: BrowserWindow;
 
 app.whenReady().then(async () => {
-    await checkForValidInstall();
+    await checkForValidFFMPEGInstall();
+    await checkForValidFFPROBEInstall();
+    // dev only storage.clear(main);
     main()
 });
 
@@ -36,7 +36,7 @@ async function main () {
 
     window = new BrowserWindow({
         icon: "icon.ico",
-        width: 800, height: 650,
+        width: 1120, height: 870,
         show: false,
         autoHideMenuBar: true,
         webPreferences: {
@@ -45,9 +45,11 @@ async function main () {
         }
     });
 
-    window.webContents.openDevTools()
+    // window.webContents.openDevTools()
     window.loadFile(join(__dirname, '..', 'index.html'));
     window.on("ready-to-show", window.show);
+
+    log("Application Version: " + app.getVersion(), "default");
 }
 
 // Application IPC CALLS
@@ -93,7 +95,7 @@ ipcMain.handle("user/select/destination", async () => {
 });
 
 ///Work QUEUE
-ipcMain.handle("push/compression/new-work", async (_, work_data: WorkProperties[]) => {
+ipcMain.handle("push/compression/new-work", async (_: any, work_data: WorkProperties[]) => {
     let previousSize = work.count;
     let all = work.push(work_data);
 
@@ -141,23 +143,16 @@ async function onStartingNewWork (current: WorkProperties) {
 
 
 async function compressFile (file: WorkProperties) {
-    return new Promise<WorkProperties>((res, rej) => {
+    return new Promise<WorkProperties>( async (res, rej) => {
         const thread = fork(__dirname + "/backend/compression/compressionWorker");
         let totalFrames = 0;
+        let showProgress = false;
+        if (existsSync(pathToFfmpeg) && existsSync(pathToFfprobe)) { 
 
-        if (existsSync(pathToFfmpeg)) { 
-            ffprobe(file.file.path, ({path: ffprobeLoaction.path}), (err, info) => {
-                if (err) console.log(err);
-                else {
-                    totalFrames = info.streams[0].nb_frames || 0;
-                    
-                }
-
-                thread.send({data: file});
-            });
+            thread.send({data: file});
 
             thread.on("message", (message: {completed: boolean, err: boolean, frameCompleted: number}) => {
-                
+                log(message, "default")
                 if (message.completed && !message.err) {
                     thread.kill();
                     res(file);
@@ -166,13 +161,12 @@ async function compressFile (file: WorkProperties) {
                     thread.kill();
                 } else {    
                      
-                    const progress = message.frameCompleted / totalFrames;
-                    window.webContents.send("/update-progress", progress);
+                    window.webContents.send("/update-progress", undefined);
                 }
             });
             
             thread.on("error", (error) => {
-                console.log(error);
+                log(error, "error");
                 rej(error);
             });
             
@@ -180,28 +174,32 @@ async function compressFile (file: WorkProperties) {
                 console.log(`Process: exited ecode: ${exitCode}`);
             });
 
-        }
+        } 
     })
 }
 
 
-ipcMain.handle("get/valid-install", async() => {
-    let installedPath = await checkForValidInstall();
+ipcMain.handle("get/valid-install-ffmpeg", async() => {
+    let installedPath = await checkForValidFFMPEGInstall();
 
+    return installedPath;
+})
+
+ipcMain.handle("get/valid-install-ffprobe", async() => {
+    let installedPath = await checkForValidFFPROBEInstall();
     return installedPath;
 })
 
 
 // Handle Iniit
 
-async function checkForValidInstall () {
+async function checkForValidFFMPEGInstall () {
     return new Promise((res, rej) => {
         storage.get("ffmpeg-path", async (err, data: any) => {
             if (err) {
                 rej(err)
             }
 
-            console.log(data.path + " path from storage");
             if (data.path) res(data.path);
             else {
                 let newPath = await installFFMPEG ();
@@ -217,10 +215,32 @@ async function checkForValidInstall () {
 }
 
 
+async function checkForValidFFPROBEInstall () {
+    return new Promise((res, rej) => {
+        storage.get("ffprobe-path", async (err, data: any) => {
+            if (err) {
+                rej(err)
+            }
+
+            if (data.path) res(data.path);
+            else {
+                let newPath = await installFFPROBE();
+                storage.set("ffprobe-path", {path: newPath} , (err) => {
+                    if (err) {
+                        rej(err);
+                    }
+                    res(newPath);
+                })
+            }
+        })
+    })
+}
+
+
 async function installFFMPEG () {
     const defaultPathToFFMPEG = app.getPath("appData") + "/ffmpeg.exe";
     return new Promise((success, reject) => {
-            console.log("making https request")
+            console.log("making https request for ffmpeg binary")
             const file = createWriteStream(defaultPathToFFMPEG);
             
             get(FFMPEG_LOCATION_HTTPS, (response) => {
@@ -228,6 +248,27 @@ async function installFFMPEG () {
                 file.on("finish", () => {
                     console.log("pipe finished")
                     success(defaultPathToFFMPEG);
+                })
+
+                response.on("error", (e: any) => {
+                    console.log(e)
+                    reject(e);
+                });
+
+            });
+    })
+}
+
+async function installFFPROBE () {
+    return new Promise((success, reject) => {
+            console.log("making https request for ffprobe binary")
+            const file = createWriteStream(pathToFfprobe);
+            
+            get(FFPROBE_LOCATION_HTTPS, (response) => {
+                response.pipe(file);
+                file.on("finish", () => {
+                    console.log("pipe finished for ffprobe");
+                    success(pathToFfprobe);
                 })
 
                 response.on("error", (e: any) => {
@@ -261,4 +302,10 @@ autoUpdater.on("update-downloaded", (e) => {
 
 autoUpdater.on("update-available", (e) => {
     window.webContents.send("update-found", "starting update now")
+    log("[Update Found]: Downloading to tmp dir.", "default");
 });
+
+function log (message: any, type?: ipcLog) {
+    window.webContents.send("debug-log", {message: message, type: type || "default"});
+    log("[Update Downloaded]: Will install on qpplication exit.", "default");
+}

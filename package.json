@@ -5,11 +5,13 @@
   "main": "./compiled/index.js",
   "scripts": {
     "build": "tsc",
+    "fresh-start": "npm install && npm run start",
     "pack": "npm install && npm run make",
     "make": "npm run build && electron-builder",
     "start": "tsc && electron .",
     "deploy": "npm run pack && tsc && electron-builder build --win --publish always"
-  }, "repository": {
+  },
+  "repository": {
     "type": "git",
     "url": "https://github.com/tylerbadger23/clip-comp.git"
   },
@@ -35,21 +37,16 @@
   "license": "ISC",
   "devDependencies": {
     "@types/electron-json-storage": "^4.5.0",
-    "@types/ffmpeg-static": "^3.0.0",
     "@types/ffprobe": "^1.1.2",
-    "@types/fluent-ffmpeg": "^2.1.18",
     "@types/node": "^16.7.13",
-    "typescript": "^4.4.2",
+    "electron": "^14.0.0",
     "electron-builder": "^22.11.7",
-    "electron": "^14.0.0"
+    "typescript": "^4.4.2"
   },
   "dependencies": {
-    "electron-updater": "^4.3.9",
-    "@types/ffprobe-static": "^2.0.0",
     "electron-json-storage": "^4.5.0",
+    "electron-updater": "^4.3.9",
     "ffprobe": "^1.1.2",
-    "ffprobe-static": "^3.0.0",
-    "ffprobe-static-electron": "^2.0.2",
     "file-type": "^16.5.3",
     "read-chunk": "^4.0.2"
   }

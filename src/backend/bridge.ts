@@ -1,5 +1,5 @@
 import { ipcRenderer, contextBridge } from "electron";
-import { cpus, platform } from "os";
+import { cpus, platform, type } from "os";
 
 const system = {
     threads: cpus().length,
@@ -12,7 +12,15 @@ const files = {
 }
 
 const app = {
-    ffmpegInstall: () => ipcRenderer.invoke("get/valid-install"),
+    onLog: () => {
+        ipcRenderer.on("debug-log", (_: any, msg: {message: any, type: ipcLog}) => {
+            if (msg.type == "error") { console.error(msg.message); }
+            if (msg.type == "vital") { console.error(`IPC Vital: \n`); console.error(msg.message); }
+            if (msg.type == "default") { console.log (msg.message); }
+        });
+    },
+    ffmpegInstall: () => ipcRenderer.invoke("get/valid-install-ffmpeg"),
+    ffprobegInstall: () => ipcRenderer.invoke("get/valid-install-ffprobe"),
     getVersion: () => ipcRenderer.invoke("get/version"),
 }
 
@@ -25,7 +33,7 @@ const _window = {
 
 
 const compressor = {
-    on: (eventname: CompressorUpdateEvents, callback: Function) => ipcRenderer.on(eventname, (_, data) => {
+    on: (eventname: CompressorUpdateEvents, callback: Function) => ipcRenderer.on(eventname, (_: any, data: any) => {
         callback(data);
     }),
     addWork: (files: WorkProperties[]) => ipcRenderer.invoke("push/compression/new-work", files),

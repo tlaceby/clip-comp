@@ -30,3 +30,5 @@ interface FileDetails {
 
 
 type CompressorUpdateEvents = "/work-update/starting-new"|  "/work-update/one-done" | "/work-update/all-done" | "/update-progress";
+
+type ipcLog = "error" | "vital" | "default"
