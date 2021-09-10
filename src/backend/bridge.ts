@@ -12,6 +12,7 @@ const files = {
 }
 
 const app = {
+    clearStorage: () => ipcRenderer.invoke("clear-storage"),
     onLog: () => {
         ipcRenderer.on("debug-log", (_: any, msg: {message: any, type: ipcLog}) => {
             if (msg.type == "error") { console.error(msg.message); }

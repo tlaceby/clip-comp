@@ -1,0 +1,16 @@
+
+#clear-storage {
+    background: var(--citrus);
+    color: white;
+    cursor: pointer;
+    padding: 30px 50px;
+    outline: none;
+    border: 2px solid var(--citrus);
+    border-radius: 5px;
+    margin: 100px auto;
+}
+
+.hint-settings {
+    width: 70vw;
+    font-weight: 300;
+}

@@ -10,9 +10,10 @@ import { Work_Queue } from "./backend/compression/workQueue";
 import EventEmitter from "events";
 import { ChildProcess, fork } from "child_process";
 import { existsSync } from "fs";
+import { autoUpdater } from "electron-updater";
+
 const events = new EventEmitter();
 const work = new Work_Queue();
-import { autoUpdater } from 'electron-updater';
 
 events.addListener("work/finished-compressing", onFinished);
 events.addListener("work/started-compression", onStartingNewWork);
@@ -23,28 +24,23 @@ const pathToFfprobe = process.env.APPDATA + "\\ffprobe.exe";
 const pathToFfmpeg = process.env.APPDATA + "\\ffmpeg.exe";
 
 let window: BrowserWindow;
+let updateCheckInterval: null | NodeJS.Timer = setInterval(() => {
+    autoUpdater.checkForUpdatesAndNotify();
+}, 20000);
+
 
 app.whenReady().then(async () => {
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
-    // Updater Stuffz
-    setTimeout(autoUpdater.checkForUpdatesAndNotify, 5000);
-    // Check for application update every 30s
-    setInterval(() => {
-        try {
-            autoUpdater.checkForUpdatesAndNotify();
-        } catch(err) {
-            console.log(err);
-            log("error with autoupdater.", "error")
-        }
-        
-    }, 30000)
     main();
 });
 
 function setWindowNormalSize () {   
+    window.resizable = true;
     window.setSize(1120, 870);
     window.center();
+    log("Application Version: " + app.getVersion(), "default", window);
+
 }
 
 async function main () {
@@ -57,14 +53,12 @@ async function main () {
         webPreferences: {
             preload: __dirname + "/backend/bridge.js",
             devTools: true
-        }
+        }, resizable: false,
     });
 
     // window.webContents.openDevTools()
     window.loadFile(join(__dirname, '..', 'index.html'));
     window.on("ready-to-show", window.show);
-
-    log("Application Version: " + app.getVersion(), "default");
 }
 
 // Application IPC CALLS
@@ -73,6 +67,11 @@ ipcMain.handle("get/version", async () => {
     return app.getVersion();
 });
 
+ipcMain.handle("clear-storage", async () => {
+    storage.clear(() => {
+        app.quit();
+    });
+})
 
 
 
@@ -167,7 +166,7 @@ async function compressFile (file: WorkProperties) {
             thread.send({data: file});
 
             thread.on("message", (message: {completed: boolean, err: boolean, frameCompleted: number}) => {
-                log(message, "default")
+                log(message, "default", window)
                 if (message.completed && !message.err) {
                     thread.kill();
                     res(file);
@@ -181,7 +180,7 @@ async function compressFile (file: WorkProperties) {
             });
             
             thread.on("error", (error) => {
-                log(error, "error");
+                log(error, "error", window);
                 rej(error);
             });
             
@@ -300,14 +299,16 @@ async function installFFPROBE () {
 
 
 autoUpdater.on("update-downloaded", (e) => {
-    window.webContents.send("update-downloaded", "an update was downloaded and will be installed when you restart the app.")
+    log("[Update Downloaded]: Restart App to install Update", "default", window);
 });
 
 autoUpdater.on("update-available", (e) => {
-    window.webContents.send("update-found", "starting update now")
-    log("[Update Found]: Downloading to tmp dir.", "default");
+    if (updateCheckInterval) clearInterval(updateCheckInterval);
+
+    updateCheckInterval = null;
+    log("[Update Found]: Downloading to tmp dir.", "default", window);
 });
 
-function log (message: any, type?: ipcLog) {
-    window.webContents.send("debug-log", {message: message, type: type || "default"});
+function log (message: any, type: ipcLog, win: BrowserWindow) {
+    if (win) win.webContents.send("debug-log", {message: message, type: type || "default"});
 }

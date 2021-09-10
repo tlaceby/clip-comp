@@ -30,3 +30,12 @@ function toDashboard () {
     hidePages();
     if (DASHBOARD) DASHBOARD.style.display = "block";
 }
+
+function toSettings () {
+    hidePages();
+    if (SETTINGS) SETTINGS.style.display = "block";
+}
+
+function clearStorage() {
+    app.app.clearStorage();
+}

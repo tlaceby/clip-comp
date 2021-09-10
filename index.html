@@ -6,12 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style/style.css">
     <link rel="stylesheet" href="./style/add_work.css">
+    <link rel="stylesheet" href="./style/settings.css">
     <link rel="stylesheet" href="./style/dashboard.css">
     <title>Clipz</title>
 </head>
 <body>
     
-    <section id='settings' style="display: none;"></section>
+    <section id='settings' style="display: none;">
+        <nav>
+            <div class="left-links">
+                <span onclick="toDashboard()" id='back-btn-new-form'>Back</span>
+            </div>
+        </nav>
+        <br>
+        <br>
+        <h1 class="center">Settings</h1>
+
+        <br><br>
+        <span id='clear-storage' onclick="clearStorage()">Clear Storage</span>
+        <p class="center hint-settings">This will close the application after deleting all the stored cache and data. This will also force re-install any updates and all binaries during first startup.</p>
+    </section>
 
     <!--
         Add work page content is for selecting the files to 
@@ -88,7 +102,7 @@
     <section id='dashboard' style="display: none;">
         <nav>
             <div class="left-links">
-                <!--<span>Settings</span> -->
+                <span onclick="toSettings()">Settings</span>
                 <span onclick="toNewWork()">Compress Files</span>
             </div>
         </nav>
