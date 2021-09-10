@@ -24,9 +24,7 @@ const pathToFfprobe = process.env.APPDATA + "\\ffprobe.exe";
 const pathToFfmpeg = process.env.APPDATA + "\\ffmpeg.exe";
 
 let window: BrowserWindow;
-let updateCheckInterval: null | NodeJS.Timer = setInterval(() => {
-    autoUpdater.checkForUpdatesAndNotify();
-}, 20000);
+let updateCheckInterval: null | NodeJS.Timer = null;
 
 
 app.whenReady().then(async () => {
@@ -40,6 +38,9 @@ function setWindowNormalSize () {
     window.setSize(1120, 870);
     window.center();
     log("Application Version: " + app.getVersion(), "default", window);
+    setInterval(() => {
+        autoUpdater.checkForUpdatesAndNotify();
+    }, 20000);
 
 }
 
