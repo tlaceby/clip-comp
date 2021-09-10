@@ -168,4 +168,3 @@ async function startup () {
     LOADING.style.display = "none";
     DASHBOARD.style.display = "block";
 }
-  
