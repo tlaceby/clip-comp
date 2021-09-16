@@ -21,12 +21,12 @@
       "target": [
         "nsis"
       ],
-      "icon": "logo-transparent.ico"
+      "icon": "icon.ico"
     },
     "nsis": {
       "oneClick": true,
-      "installerIcon": "logo-transparent.ico",
-      "uninstallerIcon": "logo-transparent.ico",
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
       "uninstallDisplayName": "clipz",
       "license": "readme.md",
       "allowToChangeInstallationDirectory": false

@@ -46,7 +46,7 @@ function setWindowNormalSize () {
 async function main () {
     
     window = new BrowserWindow({
-        icon: "logo-transparent.ico",
+        icon: "icon.ico",
         width: 350, height: 300,
         show: false,
         autoHideMenuBar: true,
