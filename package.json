@@ -1,6 +1,6 @@
 {
   "name": "clipz",
-  "version": "1.1.2",
+  "version": "1.1.5",
   "description": "GUI For easier and faster compression of video clips. Uses FFMPEG under the hood.",
   "main": "./compiled/index.js",
   "scripts": {
@@ -21,12 +21,12 @@
       "target": [
         "nsis"
       ],
-      "icon": "icon.ico"
+      "icon": "logo-transparent.ico"
     },
     "nsis": {
       "oneClick": true,
-      "installerIcon": "icon.ico",
-      "uninstallerIcon": "icon.ico",
+      "installerIcon": "logo-transparent.ico",
+      "uninstallerIcon": "logo-transparent.ico",
       "uninstallDisplayName": "clipz",
       "license": "readme.md",
       "allowToChangeInstallationDirectory": false
