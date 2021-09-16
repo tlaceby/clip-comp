@@ -8,6 +8,7 @@ const NEW_WORK_PAGE = document.getElementById("add-work") || document.createElem
 const SETTINGS = document.getElementById("settings") || document.createElement("div");
 
 // New Work Form DOM
+const back_btn_frm = document.getElementById("back-btn-new-form") as HTMLElement
 const SELECT_FOLDER_DIV = document.getElementById("select-folder-btn-area") || document.createElement("div")
 const NEW_WORK_FORM_FIELDS = document.getElementById("new-file-settings") || document.createElement("div");
 const NEW_FORM_H1 = document.getElementById("new-form-header") || document.createElement("div")

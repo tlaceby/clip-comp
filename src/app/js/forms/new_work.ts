@@ -1,4 +1,4 @@
-const back_btn_frm = document.getElementById("back-btn-new-form") || document.createElement("span");
+
 const SELECTED_FILES = document.getElementById("selected") || document.createElement("div");
 const START_WORK_BTN = document.getElementById("start-work") || document.createElement("button");
 const mutebtn = document.getElementById("mute")
@@ -114,6 +114,8 @@ function clearNewWorkForm () {
 
     //@ts-ignore
     mutebtn.checked = false;
+
+    toDashboard();
 }
 
 function show_selected_file_card (file: FileDetails) {
@@ -134,9 +136,6 @@ function show_selected_file_card (file: FileDetails) {
     SELECTED_FILES.appendChild(card);
 
 }
-// back btn click
-back_btn_frm.addEventListener("click", clearNewWorkForm)
-
 
 
 function allowStart () {
