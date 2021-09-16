@@ -20,6 +20,11 @@ async function compressCLI (options: WorkProperties) {
 
     return new Promise<boolean>((res, rej) => {
         let newPath = options.settings.new_path + `\\${options.settings.ext}${options.file.name}`;
+
+        // to avoid overwriting a exististing file create a new one with a data appended on the name.
+        if (existsSync(newPath)) {
+            newPath = options.settings.new_path + `\\${options.settings.ext}${Date.now()}${options.file.name}`;
+        }
         let cmd = ffmpeg_binary;
         let mutedFlag = "-an";
 

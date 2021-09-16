@@ -1,42 +1,37 @@
 import { app, ipcMain, BrowserWindow } from "electron";
 import * as storage from "electron-json-storage"
-import { createWriteStream } from "fs";
 import { join } from "path";
-import {user_select_multiple_files, user_select_destination} from "./backend/dialog/user_select";
-import { check_files_for_valid_type } from "./backend/file/checks";
-// import "./backend/compression/compressin_handler";
-import { get } from "https"; 
-import { Work_Queue } from "./backend/compression/workQueue";
-import EventEmitter from "events";
-import { ChildProcess, fork } from "child_process";
-import { existsSync } from "fs";
 import { autoUpdater } from "electron-updater";
 
-const events = new EventEmitter();
-const work = new Work_Queue();
+// NATIVE IMPORTS
+import {user_select_multiple_files, user_select_destination} from "./backend/dialog/user_select";
+import { check_files_for_valid_type } from "./backend/file/checks";
+import { checkForValidFFMPEGInstall, checkForValidFFPROBEInstall, log } from "./binaries";
+import _CompressionManager_ from "./backend/compression/handler";
 
-events.addListener("work/finished-compressing", onFinished);
-events.addListener("work/started-compression", onStartingNewWork);
-
-const FFPROBE_LOCATION_HTTPS = 'https://drive.google.com/u/1/uc?export=download&confirm=4uyB&id=1gBIu5E-uuqdeTslwzjVpq3d9_C3ulVPV'
-const FFMPEG_LOCATION_HTTPS = "https://clip-compressor.herokuapp.com/download/win";
-const pathToFfprobe = process.env.APPDATA + "\\ffprobe.exe";
-const pathToFfmpeg = process.env.APPDATA + "\\ffmpeg.exe";
-
+// EVENTS AND EMITTERS
+let CompressionManager: _CompressionManager_;
 let window: BrowserWindow;
 let updateCheckInterval: null | NodeJS.Timer = null;
 
-
+// Startup Main Function
+// Creates main window then initializes the CompressionManager class.
 app.whenReady().then(async () => {
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
-    main();
+    await main();
+    CompressionManager = new _CompressionManager_(window);
 });
 
+/**
+ * This method is called when the application is finished installing the 
+ * required dependecies and is ready to show the dashboard page.
+ */
 function setWindowNormalSize () {   
     window.resizable = true;
     window.setSize(1120, 870);
     window.center();
+    CompressionManager.setWindow(window);
     log("Application Version: " + app.getVersion(), "default", window);
     setInterval(() => {
         autoUpdater.checkForUpdatesAndNotify();
@@ -44,8 +39,12 @@ function setWindowNormalSize () {
 
 }
 
-async function main () {
 
+/**
+ * Creates the window as well as loads the preload script and html content.
+ */
+async function main () {
+    
     window = new BrowserWindow({
         icon: "icon.ico",
         width: 350, height: 300,
@@ -60,14 +59,20 @@ async function main () {
     // window.webContents.openDevTools()
     window.loadFile(join(__dirname, '..', 'index.html'));
     window.on("ready-to-show", window.show);
+
+    return true;
 }
 
 // Application IPC CALLS
 
+
+// returns a promise with the applicatioins version
 ipcMain.handle("get/version", async () => {
     return app.getVersion();
 });
 
+// Clears the storage. This means any and all binaries that are required will 
+// be installed upon next time the user starts up the app. 
 ipcMain.handle("clear-storage", async () => {
     storage.clear(() => {
         app.quit();
@@ -109,195 +114,23 @@ ipcMain.handle("user/select/destination", async () => {
     else return user_selected.filePaths;
 });
 
-///Work QUEUE
+/// add new work to the queue.
+// If work is not happening already then starts compressing first element inside queue 
+
 ipcMain.handle("push/compression/new-work", async (_: any, work_data: WorkProperties[]) => {
-    let previousSize = work.count;
-    let all = work.push(work_data);
+    let previousSize = CompressionManager.work.count;
+    let all = CompressionManager.work.push(work_data);
 
     // means no work is being done.
     if (previousSize === 0) {
-        events.emit("work/started-compression", work.current);
+        CompressionManager.events.emit("work/started-compression", CompressionManager.work.current);
     }
 
     return all;
 });
 
 
-async function onFinished (finished: WorkProperties) {
-    let nextToDo = work.next();
-    if (nextToDo) events.emit("work/started-compression", work.current);
-
-    console.log("Queue Count: " + work.count)
-
-
-
-    if (work.count > 0) {
-        window.webContents.send("/work-update/one-done", work.get());
-    } else window.webContents.send("/work-update/all-done", work.get());
-}
-
-async function onStartingNewWork (current: WorkProperties) {
-    try {
-        window.webContents.send("/work-update/starting-new", work.get())
-    } catch (err) {
-        console.log(err);
-    }
-    console.log("starting... \n");
-
-    let compressionTask = compressFile(current);
-
-    compressionTask.then((finished) => {
-        events.emit("work/finished-compressing", finished);
-    })
-
-    compressionTask.catch((err) => {
-        events.emit("work/finished-compressing", current);
-        console.log("FAILED TOP Compress FILE" + err)
-    })
-}
-
-
-async function compressFile (file: WorkProperties) {
-    return new Promise<WorkProperties>( async (res, rej) => {
-        const thread = fork(__dirname + "/backend/compression/compressionWorker");
-        let totalFrames = 0;
-        let showProgress = false;
-        if (existsSync(pathToFfmpeg) && existsSync(pathToFfprobe)) { 
-
-            thread.send({data: file});
-
-            thread.on("message", (message: {completed: boolean, err: boolean, frameCompleted: number}) => {
-                log(message, "default", window)
-                if (message.completed && !message.err) {
-                    thread.kill();
-                    res(file);
-                } else if (!message.completed && message.err){
-                    res(file)
-                    thread.kill();
-                } else {    
-                     
-                    window.webContents.send("/update-progress", undefined);
-                }
-            });
-            
-            thread.on("error", (error) => {
-                log(error, "error", window);
-                rej(error);
-            });
-            
-            thread.on("exit", (exitCode) => {
-                console.log(`Process: exited ecode: ${exitCode}`);
-            });
-
-        } 
-    })
-}
-
-
-ipcMain.handle("get/valid-install-ffmpeg", async() => {
-    let installedPath = await checkForValidFFMPEGInstall();
-
-    return installedPath;
-})
-
-ipcMain.handle("get/valid-install-ffprobe", async() => {
-    let installedPath = await checkForValidFFPROBEInstall();
-
-
-    setWindowNormalSize()
-    return installedPath;
-})
-
-
-// Handle Iniit
-
-async function checkForValidFFMPEGInstall () {
-    return new Promise((res, rej) => {
-        storage.get("ffmpeg-path", async (err, data: any) => {
-            if (err) {
-                rej(err)
-            }
-
-            if (data.path) res(data.path);
-            else {
-                let newPath = await installFFMPEG ();
-                storage.set("ffmpeg-path", {path: newPath} , (err) => {
-                    if (err) {
-                        rej(err);
-                    }
-                    res(newPath);
-                })
-            }
-        })
-    })
-}
-
-
-async function checkForValidFFPROBEInstall () {
-    return new Promise((res, rej) => {
-        storage.get("ffprobe-path", async (err, data: any) => {
-            if (err) {
-                rej(err)
-            }
-
-            if (data.path) res(data.path);
-            else {
-                let newPath = await installFFPROBE();
-                storage.set("ffprobe-path", {path: newPath} , (err) => {
-                    if (err) {
-                        rej(err);
-                    }
-                    res(newPath);
-                })
-            }
-        })
-    })
-}
-
-
-async function installFFMPEG () {
-    const defaultPathToFFMPEG = app.getPath("appData") + "/ffmpeg.exe";
-    return new Promise((success, reject) => {
-            console.log("making https request for ffmpeg binary")
-            const file = createWriteStream(defaultPathToFFMPEG);
-            
-            get(FFMPEG_LOCATION_HTTPS, (response) => {
-                response.pipe(file);
-                file.on("finish", () => {
-                    console.log("pipe finished")
-                    success(defaultPathToFFMPEG);
-                })
-
-                response.on("error", (e: any) => {
-                    console.log(e)
-                    reject(e);
-                });
-
-            });
-    })
-}
-
-async function installFFPROBE () {
-    return new Promise((success, reject) => {
-            console.log("making https request for ffprobe binary")
-            const file = createWriteStream(pathToFfprobe);
-            
-            get(FFPROBE_LOCATION_HTTPS, (response) => {
-                response.pipe(file);
-                file.on("finish", () => {
-                    console.log("pipe finished for ffprobe");
-                    success(pathToFfprobe);
-                })
-
-                response.on("error", (e: any) => {
-                    console.log(e)
-                    reject(e);
-                });
-
-            });
-    })
-}
-
+// Handle Iniit and auto-updater features and events
 
 autoUpdater.on("update-downloaded", (e) => {
     log("[Update Downloaded]: Restart App to install Update", "default", window);
@@ -310,6 +143,15 @@ autoUpdater.on("update-available", (e) => {
     log("[Update Found]: Downloading to tmp dir.", "default", window);
 });
 
-function log (message: any, type: ipcLog, win: BrowserWindow) {
-    if (win) win.webContents.send("debug-log", {message: message, type: type || "default"});
-}
+
+ipcMain.handle("get/valid-install-ffmpeg", async() => {
+    let installedPath = await checkForValidFFMPEGInstall();
+    return installedPath;
+})
+
+ipcMain.handle("get/valid-install-ffprobe", async() => {
+    let installedPath = await checkForValidFFPROBEInstall();
+
+    setWindowNormalSize()
+    return installedPath;
+})
