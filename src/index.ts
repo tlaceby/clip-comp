@@ -3,13 +3,20 @@ import * as storage from "electron-json-storage"
 import { join } from "path";
 import { autoUpdater } from "electron-updater";
 
-// NATIVE IMPORTS
+////////////////
+//// IMPORTS //
+//////////////
+
 import {user_select_multiple_files, user_select_destination} from "./backend/dialog/user_select";
 import { check_files_for_valid_type } from "./backend/file/checks";
 import { checkForValidFFMPEGInstall, checkForValidFFPROBEInstall, log } from "./binaries";
 import _CompressionManager_ from "./backend/compression/handler";
 
-// EVENTS AND EMITTERS
+//////////////////////////
+//// EVENTS & EMITTERS //
+////////////////////////
+///////////////////////
+
 let CompressionManager: _CompressionManager_;
 let window: BrowserWindow;
 let updateCheckInterval: null | NodeJS.Timer = null;
@@ -21,7 +28,18 @@ app.whenReady().then(async () => {
     autoUpdater.autoInstallOnAppQuit = true;
     await main();
     CompressionManager = new _CompressionManager_(window);
+
+    // handle updates via github releases.
+    autoUpdater.checkForUpdatesAndNotify();
+    // Call the update-interval
+    updateCheckInterval = setInterval(() => {
+        autoUpdater.checkForUpdatesAndNotify();
+    }, 30000);
 });
+
+/////////////////////
+//// MAIN STARTUP //
+///////////////////
 
 /**
  * This method is called when the application is finished installing the 
@@ -33,9 +51,6 @@ function setWindowNormalSize () {
     window.center();
     CompressionManager.setWindow(window);
     log("Application Version: " + app.getVersion(), "default", window);
-    setInterval(() => {
-        autoUpdater.checkForUpdatesAndNotify();
-    }, 20000);
 
 }
 
@@ -63,7 +78,9 @@ async function main () {
     return true;
 }
 
-// Application IPC CALLS
+//////////////////
+//// IPC CALLS //
+////////////////
 
 
 // returns a promise with the applicatioins version
@@ -80,12 +97,14 @@ ipcMain.handle("clear-storage", async () => {
 })
 
 
+//////////////////
+//// IPC WORK ///
+////////////////
 
-/// Window Related APP CALLS
 
-
-
-// Work Related Calls
+// This IPC Call allows the user to select a single or mutltiple video files and 
+// from that selection It will verify whether the video files are valid and able to be //
+// compressed. If zero files are compressable it will simply return a empty array[]
 
 ipcMain.handle("user/select/video-files", async () => {
 
@@ -106,6 +125,7 @@ ipcMain.handle("user/select/video-files", async () => {
 
 });
 
+
 ipcMain.handle("user/select/destination", async () => {
     const user_selected = await user_select_destination ();
 
@@ -114,7 +134,14 @@ ipcMain.handle("user/select/destination", async () => {
     else return user_selected.filePaths;
 });
 
-/// add new work to the queue.
+/////////////////////////////
+////////////////////////////
+/// ipc new-work-request //
+//////////////////////////
+/////////////////////////
+
+
+/// Add new work to the queue.
 // If work is not happening already then starts compressing first element inside queue 
 
 ipcMain.handle("push/compression/new-work", async (_: any, work_data: WorkProperties[]) => {
@@ -129,26 +156,41 @@ ipcMain.handle("push/compression/new-work", async (_: any, work_data: WorkProper
     return all;
 });
 
+////////////////////////
+// AUTO-UPDATES  //////
+// BINARY PATHS /////
+////////////////////
 
-// Handle Iniit and auto-updater features and events
-
-autoUpdater.on("update-downloaded", (e) => {
+autoUpdater.on("update-downloaded", () => {
     log("[Update Downloaded]: Restart App to install Update", "default", window);
+    autoUpdater.autoInstallOnAppQuit = true;
 });
 
-autoUpdater.on("update-available", (e) => {
-    if (updateCheckInterval) clearInterval(updateCheckInterval);
+// Checks for a update agains the github releases. If found starts downloading.
 
-    updateCheckInterval = null;
-    log("[Update Found]: Downloading to tmp dir.", "default", window);
+autoUpdater.on("update-available", () => {
+    
+    // If the interval is valid then done check again.
+    if (updateCheckInterval) {
+        clearInterval(updateCheckInterval);
+        updateCheckInterval = null;
+    }
+
+    log("[Update Found]: Downloading to users' tmp dir.", "default", window);
 });
 
 
+// Checks for a valid binary installation. If the binary is found and exists on the
+// filesystem it will return true. It will install otherwise.
 ipcMain.handle("get/valid-install-ffmpeg", async() => {
     let installedPath = await checkForValidFFMPEGInstall();
     return installedPath;
 })
 
+
+// Checks for a valid binary installation. If the binary is found and exists on the
+// filesystem it will return true.
+// If the binary is null or corrupted it will install it using HTTPS.
 ipcMain.handle("get/valid-install-ffprobe", async() => {
     let installedPath = await checkForValidFFPROBEInstall();
 
