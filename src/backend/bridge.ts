@@ -25,16 +25,17 @@ const files = {
  */
 const app = {
     clearStorage: () => ipcRenderer.invoke("clear-storage"),
-    onLog: () => {
+    onLog: (cb: (msg: any, type: ipcLog)=> void) => {
         ipcRenderer.on("debug-log", (_: any, msg: {message: any, type: ipcLog}) => {
-            if (msg.type == "error") { console.error(msg.message); }
-            if (msg.type == "vital") { console.error(`IPC Vital: \n`); console.error(msg.message); }
-            if (msg.type == "default") { console.log (msg.message); }
+            cb(msg.message, msg.type);
         });
     },
     ffmpegInstall: () => ipcRenderer.invoke("get/valid-install-ffmpeg"),
     ffprobegInstall: () => ipcRenderer.invoke("get/valid-install-ffprobe"),
     getVersion: () => ipcRenderer.invoke("get/version"),
+    OnIPCProgress: (evname: ProgressIPCEvent, cb: (data: ProgressIPCData) => void) => ipcRenderer.on("percentage-update", (_, data: ProgressIPCData) => {
+        if (evname == data.for) cb(data);
+    }),
 }
 
 /**

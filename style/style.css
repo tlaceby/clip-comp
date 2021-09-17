@@ -98,11 +98,6 @@ body {
     text-align: center;
 }
 
-#install-loading {
-    padding-bottom: 20px;
-    font-size: 1.4em;
-    color: #111;
-}
 
 #loader {
     margin:auto;

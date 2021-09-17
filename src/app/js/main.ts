@@ -1,11 +1,18 @@
 const STATUS_DIV = document.getElementById("status-div") || document.createElement("div");
-app.app.onLog();
 app.compress.on("/work-update/starting-new", updateDashboardView);
 app.compress.on("/work-update/all-done", allDone);
 app.compress.on("/update-progress", updateProgressBar);
 
+// allow the user to opt in to messages from the console to
+// see whats going on withn your app in real time.
+app.app.onLog((msg) => {
+    if (localStorage.getItem("show-ipc-logs")) {
+        if (msg.type == "vital") { console.error(`IPC Vital: \n`); console.error(msg.message); }
+        if (msg.type == "default") { console.log (msg.message); }
+    }
 
-startup();
+    if (msg.type == "error") { console.error(msg.message);}
+});
 
 function updateDashboardView (queue: WorkProperties[]) {
 
@@ -158,13 +165,3 @@ function getRandomIntInclusive(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
 }
 
-
-async function startup () {
-    let ffmpegLocation = await app.app.ffmpegInstall();
-    console.log("installed ffmpeg \n starting install of ffprobe");
-    let ffprobeLocation = await app.app.ffprobegInstall();
-
-    console.log("ffprobe and ffmpeg are installed.");
-    LOADING.style.display = "none";
-    DASHBOARD.style.display = "block";
-}

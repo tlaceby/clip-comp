@@ -183,7 +183,7 @@ autoUpdater.on("update-available", () => {
 // Checks for a valid binary installation. If the binary is found and exists on the
 // filesystem it will return true. It will install otherwise.
 ipcMain.handle("get/valid-install-ffmpeg", async() => {
-    let installedPath = await checkForValidFFMPEGInstall();
+    let installedPath = await checkForValidFFMPEGInstall(window);
     return installedPath;
 })
 
@@ -192,8 +192,8 @@ ipcMain.handle("get/valid-install-ffmpeg", async() => {
 // filesystem it will return true.
 // If the binary is null or corrupted it will install it using HTTPS.
 ipcMain.handle("get/valid-install-ffprobe", async() => {
-    let installedPath = await checkForValidFFPROBEInstall();
-
+    let installedPath = await checkForValidFFPROBEInstall(window);
+    
     setWindowNormalSize()
     return installedPath;
 })

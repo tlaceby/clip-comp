@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./style/add_work.css">
     <link rel="stylesheet" href="./style/settings.css">
     <link rel="stylesheet" href="./style/dashboard.css">
+    <link rel="stylesheet" href="./style/loader.css">
     <title>Clipz</title>
 </head>
 <body>
@@ -119,13 +120,19 @@
     <section id='loading'>
         <div class="center-loader">
             <h3 id='install-loading'>Installing Required Binaries</h3>
-            <div class="loader" id='loader'></div>
+            <div id="progress-install">
+                <div id="progress-inner-install"></div>
+            </div>
+
+            <p id='loader-hint'>Installing FFMPEG Dependecies</p>
+
         </div>
     </section>
     <!-------------------------------------------------------------------------------------
         REQUIRED JAVASCRIPT ON TOP  -->
 
     <script src="./compiled/app/global.js" defer></script>
+    <script src="./compiled/app/js/startup.js" defer></script>
     <script src="./compiled/app/js/main.js" defer></script>
     <!--    Still required but can be loaded later for user experience. -->
 
