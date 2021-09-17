@@ -1,11 +1,20 @@
 import { spawn } from "child_process";
 import { existsSync } from "fs";
 const ffmpeg_binary = process.env.APPDATA + "\\ffmpeg.exe";
+
+// Handle the initial message
 process.on("message", async (message: {data: WorkProperties}) => {   
- 
-    if (!existsSync(ffmpeg_binary) && process.send)  {
+
+
+    // Verify as LAST resort the location of the binary.
+    // TODO :  - -- - - - - - - -- - - -- - - - -- - -- - 
+    // ACTUALLY NOTIFY THE USER OF THE INVALID INSTALL 
+    // INSTEAD OF JJST LOGGING TO CONSOLE
+    if (!existsSync(ffmpeg_binary) && process.send) {
         process.send({err: true, completed: false, msg: "NO FFMPEG"});
     }
+
+
     let result = await compressCLI(message.data)
     console.log(result)
     if (process.send) {
