@@ -1,8 +1,9 @@
 async function startup () {
+    console.log("show-ipc-logs: " + localStorage.getItem("show-ipc-logs") || false);
     app.app.OnIPCProgress("installing-dependecies", (data) => {
         updateStartupProgressInformation(data);
 
-        if (localStorage.getItem("show-ipc-logs")) console.log(data);
+        if (localStorage.getItem("show-ipc-logs") === "true") console.log(data);
     });
 
     let ffmpegLocation = await app.app.ffmpegInstall();

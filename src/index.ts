@@ -9,7 +9,7 @@ import { autoUpdater } from "electron-updater";
 
 import {user_select_multiple_files, user_select_destination} from "./backend/dialog/user_select";
 import { check_files_for_valid_type } from "./backend/file/checks";
-import { checkForValidFFMPEGInstall, checkForValidFFPROBEInstall, log } from "./binaries";
+import { checkForValidFFMPEGInstall, checkForValidFFPROBEInstall, debug_log, log } from "./binaries";
 import _CompressionManager_ from "./backend/compression/handler";
 
 //////////////////////////
@@ -150,6 +150,7 @@ ipcMain.handle("push/compression/new-work", async (_: any, work_data: WorkProper
 
     // means no work is being done.
     if (previousSize === 0) {
+        debug_log("Starting new work with queue.", window);
         CompressionManager.events.emit("work/started-compression", CompressionManager.work.current);
     }
 

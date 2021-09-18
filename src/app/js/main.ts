@@ -5,13 +5,13 @@ app.compress.on("/update-progress", updateProgressBar);
 
 // allow the user to opt in to messages from the console to
 // see whats going on withn your app in real time.
-app.app.onLog((msg) => {
-    if (localStorage.getItem("show-ipc-logs")) {
-        if (msg.type == "vital") { console.error(`IPC Vital: \n`); console.error(msg.message); }
-        if (msg.type == "default") { console.log (msg.message); }
+app.app.onLog((msg: any, type: ipcLog, alertMessage: boolean) => {
+    if (localStorage.getItem("show-ipc-logs") === "true") {
+        if (type == "vital") { console.error(`IPC Vital: \n`); console.error(msg); }
+        if (type == "default") { console.log (msg); }
     }
-
-    if (msg.type == "error") { console.error(msg.message);}
+    if (type == "error") { console.error(msg);}
+    if (alertMessage) alert(msg);
 });
 
 function updateDashboardView (queue: WorkProperties[]) {

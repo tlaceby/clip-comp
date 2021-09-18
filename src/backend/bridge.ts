@@ -25,9 +25,9 @@ const files = {
  */
 const app = {
     clearStorage: () => ipcRenderer.invoke("clear-storage"),
-    onLog: (cb: (msg: any, type: ipcLog)=> void) => {
-        ipcRenderer.on("debug-log", (_: any, msg: {message: any, type: ipcLog}) => {
-            cb(msg.message, msg.type);
+    onLog: (cb: (msg: any, type: ipcLog, alertMessage: boolean)=> void) => {
+        ipcRenderer.on("debug-log", (_: any, msg: {message: any, type: ipcLog, alertMessage: boolean}) => {
+            cb(msg.message, msg.type, msg.alertMessage);
         });
     },
     ffmpegInstall: () => ipcRenderer.invoke("get/valid-install-ffmpeg"),
