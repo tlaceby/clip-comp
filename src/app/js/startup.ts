@@ -1,4 +1,5 @@
 async function startup () {
+    const v = document.getElementById("version") as HTMLElement;
     console.log("show-ipc-logs: " + localStorage.getItem("show-ipc-logs") || false);
     app.app.OnIPCProgress("installing-dependecies", (data) => {
         updateStartupProgressInformation(data);
@@ -9,7 +10,8 @@ async function startup () {
     let ffmpegLocation = await app.app.ffmpegInstall();
     console.log("installed ffmpeg \n starting install of ffprobe");
     let ffprobeLocation = await app.app.ffprobegInstall();
-
+    let version = await app.app.getVersion();
+    v.innerText = `version: ${version}`;
     console.log("ffprobe and ffmpeg are installed.");
     LOADING.style.display = "none";
     DASHBOARD.style.display = "block";
