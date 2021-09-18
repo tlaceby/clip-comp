@@ -1,0 +1,32 @@
+#progress-install {
+    margin-top: 20px;
+    width: 80vw;
+    height: 30px;
+    border-radius: 8px;
+    background: transparent;
+    padding-top: 0;
+    border: 1px solid var(--citrus);
+}
+
+#install-loading {
+    padding-bottom: 20px;
+    font-size: 1.5em;
+    font-weight: 100;
+    color: #111;
+}
+
+#loader-hint {
+    color: #333;
+    font-weight: 100;
+    font-style: italic;
+    padding-top: 16px;
+    text-align: center;
+}
+
+#progress-inner-install {
+    padding-top: 0;
+    height: 30px;
+    width: 0%;
+    background: var(--citrus);
+    border-radius: 8px;
+}

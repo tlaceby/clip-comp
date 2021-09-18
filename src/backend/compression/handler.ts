@@ -2,9 +2,9 @@ import { fork } from "child_process";
 import { BrowserWindow } from "electron";
 import EventEmitter from "events";
 import { existsSync } from "fs";
-import { log, pathToFfmpeg, pathToFfprobe } from "../../binaries";
+import { checkValidInstalledFile, installFFMPEG, log, pathToFfmpeg, pathToFfprobe } from "../../binaries";
 import { Work_Queue } from "./workQueue";
-
+import * as store from "electron-json-storage";
 
 /**
  * The CompressionManager is responsible for managing the queue state as well
@@ -64,43 +64,63 @@ export default class _CompressionManager_ {
      */
     private async compressFile (file: WorkProperties) {
         return new Promise<WorkProperties>( async (res, rej) => {
+            const validFFMPEG = await checkValidInstalledFile("ffmpeg", pathToFfmpeg);
 
             // Create a child process to be ran with the ffmpeg compress code.
             const thread = fork(__dirname + "\\compressionWorker");
-            if (existsSync(pathToFfmpeg) && existsSync(pathToFfprobe)) { 
 
-                // send data to the worker and setup listeners over IPC
-                thread.send({data: file});
+            // There are 3 message types you can recieve for now from the 
+            // child thread.
+            /*
+            1) Success and completed without any errors.
+            2) Failed / Error message -  Typically caused
+            whern ffmpeg has a issue or the file is corrupted.
 
-                // There are 3 message types you can recieve for now from the 
-                // child thread.
-                /*
-                1) Success and completed without any errors.
-                2) Failed / Error message -  Typically caused
-                whern ffmpeg has a issue or the file is corrupted.
+            3) This is a status message thats send to update the 
+            chrome window of the frame thats completed.
+            later this will be used to display a progress percentage.
+            */
+            thread.on("message", (message: {completed: boolean, err: boolean, frameCompleted: number}) => {
+                log(message, "default", this.window)
+                if (message.completed && !message.err) {
+                    thread.kill();
+                    res(file);
+                } else if (!message.completed && message.err){
+                    res(file)
+                    thread.kill();
+                } else {    
+                    this.window.webContents.send("/update-progress", undefined);
+                }
+            });
+            
+            thread.on("error", (error) => {
+                log(error, "error", this.window);
+                rej(error);
+            });
 
-                3) This is a status message thats send to update the 
-                chrome window of the frame thats completed.
-                later this will be used to display a progress percentage.
-                */
-                thread.on("message", (message: {completed: boolean, err: boolean, frameCompleted: number}) => {
-                    log(message, "default", this.window)
-                    if (message.completed && !message.err) {
-                        thread.kill();
-                        res(file);
-                    } else if (!message.completed && message.err){
-                        res(file)
-                        thread.kill();
-                    } else {    
-                        this.window.webContents.send("/update-progress", undefined);
-                    }
-                });
-                
-                thread.on("error", (error) => {
-                    log(error, "error", this.window);
-                    rej(error);
-                });
-            } 
+            // if the file is not valid we must install it and then proceed after.
+            if (!validFFMPEG) {
+                log("Vital files cannot be found. Installing required binaries. Please dont disconnect the app from the internet.", "error", this.window, true);
+                // check for valid internet connection.
+                try {
+                    let installPath = await installFFMPEG();
+
+                    // lastly save the new path to storage and send the thread our new information.
+                    store.set("ffmpeg-path", {path: installPath} , (err) => {
+                        if (err) {
+                            thread.kill();
+                            rej(err);
+                        }
+                        
+                    })
+                    thread.send({data: file});
+                } catch (err) {
+                    thread.kill();
+                    rej(err);
+                }
+
+            } else thread.send({data: file});
+            
         })
     }
 

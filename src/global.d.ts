@@ -60,3 +60,14 @@ type CompressorUpdateEvents = "/work-update/starting-new"|  "/work-update/one-do
  * contain usual white text.
  */
 type ipcLog = "error" | "vital" | "default"
+
+/**
+ * Allows the front end process to determine what type of progress bar to be updated.
+ */
+type ProgressIPCEvent = "download-ffmpeg" | "download-ffprobe" | "installing-dependecies" | "downloading-updates" | "other";
+
+interface ProgressIPCData {
+    for: ProgressIPCEvent, 
+    percentage: number, 
+    msg: string,
+}

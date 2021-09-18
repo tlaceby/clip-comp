@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import { existsSync } from "fs";
-const ffmpeg_binary = process.env.APPDATA + "\\ffmpeg.exe";
+import { pathToFfmpeg } from "../../binaries";
+
 
 // Handle the initial message
 process.on("message", async (message: {data: WorkProperties}) => {   
@@ -10,7 +11,7 @@ process.on("message", async (message: {data: WorkProperties}) => {
     // TODO :  - -- - - - - - - -- - - -- - - - -- - -- - 
     // ACTUALLY NOTIFY THE USER OF THE INVALID INSTALL 
     // INSTEAD OF JJST LOGGING TO CONSOLE
-    if (!existsSync(ffmpeg_binary) && process.send) {
+    if (!existsSync(pathToFfmpeg) && process.send) {
         process.send({err: true, completed: false, msg: "NO FFMPEG"});
     }
 
@@ -34,7 +35,7 @@ async function compressCLI (options: WorkProperties) {
         if (existsSync(newPath)) {
             newPath = options.settings.new_path + `\\${options.settings.ext}${Date.now()}${options.file.name}`;
         }
-        let cmd = ffmpeg_binary;
+        let cmd = pathToFfmpeg;
         let mutedFlag = "-an";
 
         let ffmpegOptions = [

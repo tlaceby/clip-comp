@@ -22,6 +22,11 @@ const SELECT_FOLDER_DIV = document.getElementById("select-folder-btn-area") as H
 const NEW_WORK_FORM_FIELDS = document.getElementById("new-file-settings")as HTMLElement;
 const NEW_FORM_H1 = document.getElementById("new-form-header") as HTMLElement;
 
+// Loading and Progress
+const LOADING_HINT_TEXT = document.getElementById("loader-hint") as HTMLElement;
+const LOADING_BAR_OUTER = document.getElementById("progress-install") as HTMLElement;
+const LOADING_BAR_INNER = document.getElementById("progress-inner-install") as HTMLElement;
+
 /////////////////////////
 //// PAGE TRANSITIONS //
 ///////////////////////
