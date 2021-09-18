@@ -19,8 +19,8 @@ import _CompressionManager_ from "./backend/compression/handler";
 
 let CompressionManager: _CompressionManager_;
 let window: BrowserWindow;
-let updateCheckInterval: null | NodeJS.Timer = null;
-
+let updateCheckInterval: undefined | NodeJS.Timer = undefined;
+let updateFound= false;
 // Startup Main Function
 // Creates main window then initializes the CompressionManager class.
 app.whenReady().then(async () => {
@@ -29,12 +29,10 @@ app.whenReady().then(async () => {
     await main();
     CompressionManager = new _CompressionManager_(window);
 
-    // handle updates via github releases.
-    autoUpdater.checkForUpdatesAndNotify();
     // Call the update-interval
     updateCheckInterval = setInterval(() => {
         autoUpdater.checkForUpdatesAndNotify();
-    }, 30000);
+    }, 10000);
 });
 
 /////////////////////
@@ -63,6 +61,7 @@ async function main () {
     window = new BrowserWindow({
         icon: "icon.ico",
         width: 350, height: 300,
+        maximizable: false,
         show: false,
         autoHideMenuBar: true,
         webPreferences: {
@@ -163,7 +162,7 @@ ipcMain.handle("push/compression/new-work", async (_: any, work_data: WorkProper
 ////////////////////
 
 autoUpdater.on("update-downloaded", () => {
-    log("[Update Downloaded]: Restart App to install Update", "default", window);
+    log("[Update Downloaded]: Restart App to install Update", "error", window);
     autoUpdater.autoInstallOnAppQuit = true;
 });
 
@@ -172,12 +171,10 @@ autoUpdater.on("update-downloaded", () => {
 autoUpdater.on("update-available", () => {
     
     // If the interval is valid then done check again.
-    if (updateCheckInterval) {
-        clearInterval(updateCheckInterval);
-        updateCheckInterval = null;
+    if (!updateFound) {
+        log("[Update Found]: Downloading to users' tmp dir.", "error", window);
+        updateFound = true;   
     }
-
-    log("[Update Found]: Downloading to users' tmp dir.", "default", window);
 });
 
 
