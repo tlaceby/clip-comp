@@ -5,6 +5,7 @@ import { existsSync } from "fs";
 import { checkValidInstalledFile, installFFMPEG, log, pathToFfmpeg, pathToFfprobe } from "../../binaries";
 import { Work_Queue } from "./workQueue";
 import * as store from "electron-json-storage";
+import { sep } from "path";
 
 /**
  * The CompressionManager is responsible for managing the queue state as well
@@ -67,7 +68,7 @@ export default class _CompressionManager_ {
             const validFFMPEG = await checkValidInstalledFile("ffmpeg", pathToFfmpeg);
 
             // Create a child process to be ran with the ffmpeg compress code.
-            const thread = fork(__dirname + "\\compressionWorker");
+            const thread = fork(__dirname + `${sep}compressionWorker`);
 
             // There are 3 message types you can recieve for now from the 
             // child thread.

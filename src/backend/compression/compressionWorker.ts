@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import { existsSync } from "fs";
 import { pathToFfmpeg } from "../../binaries";
-
+import { join, sep } from "path";
 
 // Handle the initial message
 process.on("message", async (message: {data: WorkProperties}) => {   
@@ -29,11 +29,11 @@ process.on("message", async (message: {data: WorkProperties}) => {
 async function compressCLI (options: WorkProperties) {
 
     return new Promise<boolean>((res, rej) => {
-        let newPath = options.settings.new_path + `\\${options.settings.ext}${options.file.name}`;
+        let newPath = options.settings.new_path + `${sep}${options.settings.ext}${options.file.name}`;
 
         // to avoid overwriting a exististing file create a new one with a data appended on the name.
         if (existsSync(newPath)) {
-            newPath = options.settings.new_path + `\\${options.settings.ext}${Date.now()}${options.file.name}`;
+            newPath = options.settings.new_path + `${sep}${options.settings.ext}${Date.now()}${options.file.name}`;
         }
         let cmd = pathToFfmpeg;
         let mutedFlag = "-an";
