@@ -27,6 +27,10 @@ const LOADING_HINT_TEXT = document.getElementById("loader-hint") as HTMLElement;
 const LOADING_BAR_OUTER = document.getElementById("progress-install") as HTMLElement;
 const LOADING_BAR_INNER = document.getElementById("progress-inner-install") as HTMLElement;
 
+
+const EDITOR = document.getElementById("editor") as HTMLElement;
+const PRE_EDITOR = document.getElementById("pre-edit") as HTMLElement;
+const POST_EDITOR = document.getElementById("post-edit") as HTMLElement;
 /////////////////////////
 //// PAGE TRANSITIONS //
 ///////////////////////
@@ -38,6 +42,8 @@ function hidePages () {
     DASHBOARD.style.display = "none";
     NEW_WORK_PAGE.style.display = "none";
     SETTINGS.style.display = "none";
+    EDITOR.style.display = "none";
+    hideEditorPages();
 }
 
 /**
@@ -46,6 +52,15 @@ function hidePages () {
 function toNewWork () {
     hidePages();
     if (NEW_WORK_PAGE) NEW_WORK_PAGE.style.display = "block";
+}
+
+/**
+ * Editor menu page transition.
+ */
+ function toEditor () {
+    hidePages();
+    if (EDITOR) EDITOR.style.display = "block";
+    PRE_EDITOR.style.display = "block";
 }
 
 /**
@@ -78,4 +93,22 @@ function toSettings () {
  */
 function clearStorage() {
     app.app.clearStorage();
+}
+
+
+//////// EDITOR PAGE TRANSITIONS
+
+function hideEditorPages () {
+    PRE_EDITOR.style.display = "none";
+    POST_EDITOR.style.display = "none";
+}
+
+function showPostEditor () {
+    hideEditorPages();
+    POST_EDITOR.style.display = "block";
+}
+
+function showPreEditor () {
+    hideEditorPages();
+    PRE_EDITOR.style.display = "block";
 }

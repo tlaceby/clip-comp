@@ -10,6 +10,10 @@ const system = {
     platform: platform()
 }
 
+const editor = {
+    selectVideoOpen: () => ipcRenderer.invoke("editor/select-video-open"),
+}
+
 /**
  * API methods for selecting and viewing files and folders. These work by creating 
  * dialog boxes for the user to make selections.
@@ -75,6 +79,7 @@ export const API = {
     app: app,
     compress: compressor,
     window: _window,
+    editor: editor,
 }
 
 

@@ -25,3 +25,15 @@ export async function user_select_destination () {
     })
 
 }
+
+export async function user_select_single () {
+
+    return new Promise<OpenDialogReturnValue>(async (res, rej) => {
+        const diaolg_results = dialog.showOpenDialog({properties: ['openFile']});
+
+        diaolg_results.then((results) => res(results));
+
+        diaolg_results.catch((err) => rej(err));
+    })
+
+}

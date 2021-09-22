@@ -4,7 +4,6 @@ import { createWriteStream, existsSync, lstatSync } from "fs";
 import { join, extname, sep, toNamespacedPath } from "path";
 import { get } from "https";
 import { platform } from "os";
-import { app } from "electron";
 ///////////////////
 //// binary loc //
 /////////////////
@@ -21,10 +20,11 @@ export const FFMPEG_LOCATION_HTTPS = "https://clip-compressor.herokuapp.com/down
 
 export const pathToFfprobe = 
     (platform() == "win32")? process.env.USERPROFILE + `${sep}ffprobe.exe`: 
-    app.getPath('userData') + `${sep}ffprobe.exe`;
+    process.env.HOME + `${sep}ffprobe.exe`;
+    
 export const pathToFfmpeg = 
     (platform() == "win32")? process.env.USERPROFILE + `${sep}ffmpeg.exe`: 
-    app.getPath('userData') + `${sep}ffmpeg.exe`;
+    process.env.HOME + `${sep}ffmpeg.exe`;
 
 
 /**

@@ -7,7 +7,7 @@ import { autoUpdater } from "electron-updater";
 //// IMPORTS //
 //////////////
 
-import {user_select_multiple_files, user_select_destination} from "./backend/dialog/user_select";
+import {user_select_multiple_files, user_select_destination, user_select_single} from "./backend/dialog/user_select";
 import { check_files_for_valid_type } from "./backend/file/checks";
 import { checkForValidFFMPEGInstall, checkForValidFFPROBEInstall, debug_log, log, pathToFfmpeg, pathToFfprobe } from "./binaries";
 import _CompressionManager_ from "./backend/compression/handler";
@@ -20,7 +20,7 @@ import _CompressionManager_ from "./backend/compression/handler";
 let CompressionManager: _CompressionManager_;
 let window: BrowserWindow;
 let updateCheckInterval: undefined | NodeJS.Timer = undefined;
-let updateFound= false;
+let updateFound = false;
 // Startup Main Function
 // Creates main window then initializes the CompressionManager class.
 app.whenReady().then(async () => {
@@ -28,7 +28,6 @@ app.whenReady().then(async () => {
     autoUpdater.autoInstallOnAppQuit = true;
     await main();
     CompressionManager = new _CompressionManager_(window);
-    console.log(pathToFfprobe, pathToFfmpeg);
 
     // Call the update-interval
     updateCheckInterval = setInterval(() => {
@@ -195,4 +194,19 @@ ipcMain.handle("get/valid-install-ffprobe", async() => {
     
     setWindowNormalSize()
     return installedPath;
+})
+
+
+
+
+/// EDITOR VIDEO IPC-CALLS  
+
+ipcMain.handle("editor/select-video-open", async (_, handler) => {
+    const video = await user_select_single();
+
+    if (video.canceled) return undefined;
+    
+    const videoDetailsArr = await check_files_for_valid_type(video.filePaths);
+
+    return videoDetailsArr;
 })
