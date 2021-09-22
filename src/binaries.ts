@@ -1,16 +1,31 @@
 import { BrowserWindow } from "electron";
 import storage from "electron-json-storage";
 import { createWriteStream, existsSync, lstatSync } from "fs";
+import { join, extname, sep, toNamespacedPath } from "path";
 import { get } from "https";
-
+import { platform } from "os";
+import { app } from "electron";
 ///////////////////
 //// binary loc //
 /////////////////
 
+export const BINARY_BYTES = {
+    ffmpeg: 76000000,
+    ffprobe: 43000000
+}
+
 export const FFPROBE_LOCATION_HTTPS = 'https://clip-compressor.herokuapp.com/download/ffprobe/win';
 export const FFMPEG_LOCATION_HTTPS = "https://clip-compressor.herokuapp.com/download/win";
-export const pathToFfprobe = process.env.USERPROFILE + "\\ffprobe.exe";
-export const pathToFfmpeg = process.env.USERPROFILE + "\\ffmpeg.exe";
+
+// Create the path to ffprobe and ffmpeg based on platform.
+
+export const pathToFfprobe = 
+    (platform() == "win32")? process.env.USERPROFILE + `${sep}ffprobe.exe`: 
+    app.getPath('userData') + `${sep}ffprobe.exe`;
+export const pathToFfmpeg = 
+    (platform() == "win32")? process.env.USERPROFILE + `${sep}ffmpeg.exe`: 
+    app.getPath('userData') + `${sep}ffmpeg.exe`;
+
 
 /**
  * From the main process you can communicate with any window object. Specifify the message type as well as the body and window.
@@ -100,7 +115,7 @@ export async function checkForValidFFPROBEInstall (win: BrowserWindow) {
 export async function installFFMPEG (win?: BrowserWindow) {
     return new Promise((success, reject) => {
             let file = createWriteStream(pathToFfmpeg);
-            let total_bytes = 4900000;
+            let total_bytes = BINARY_BYTES.ffmpeg;
             let recieved_bytes = 0;
 
             get(FFMPEG_LOCATION_HTTPS, (res) => {
@@ -137,7 +152,7 @@ export async function installFFMPEG (win?: BrowserWindow) {
 export async function installFFPROBE (win?: BrowserWindow) {
     return new Promise((success, reject) => {
             let file = createWriteStream(pathToFfprobe);
-            let total_bytes = 4900000;
+            let total_bytes = BINARY_BYTES.ffprobe;
             let recieved_bytes = 0;
 
             get(FFPROBE_LOCATION_HTTPS, (res) => {
@@ -185,7 +200,7 @@ export function sendProgressUpdate (percentage: number, progressFor: ProgressIPC
 export async function checkValidInstalledFile (binary: "ffmpeg" | "ffprobe", path: string) {
     if (!existsSync(path)) return false;
 
-    const minimumBytes = (binary == "ffmpeg")? 76000000 : 43000000; 
+    const minimumBytes = (binary == "ffmpeg")? BINARY_BYTES.ffmpeg : BINARY_BYTES.ffprobe; 
     // ffprobe: 43023360 bytes, ffmpeg: 76434432 bytes
 
     try {

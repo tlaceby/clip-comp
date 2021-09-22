@@ -1,6 +1,6 @@
 import { app, ipcMain, BrowserWindow } from "electron";
-import * as storage from "electron-json-storage"
-import { join } from "path";
+import * as storage from "electron-json-storage";
+import { join, extname, sep, toNamespacedPath } from "path";
 import { autoUpdater } from "electron-updater";
 
 ////////////////
@@ -9,7 +9,7 @@ import { autoUpdater } from "electron-updater";
 
 import {user_select_multiple_files, user_select_destination} from "./backend/dialog/user_select";
 import { check_files_for_valid_type } from "./backend/file/checks";
-import { checkForValidFFMPEGInstall, checkForValidFFPROBEInstall, debug_log, log } from "./binaries";
+import { checkForValidFFMPEGInstall, checkForValidFFPROBEInstall, debug_log, log, pathToFfmpeg, pathToFfprobe } from "./binaries";
 import _CompressionManager_ from "./backend/compression/handler";
 
 //////////////////////////
@@ -28,6 +28,7 @@ app.whenReady().then(async () => {
     autoUpdater.autoInstallOnAppQuit = true;
     await main();
     CompressionManager = new _CompressionManager_(window);
+    console.log(pathToFfprobe, pathToFfmpeg);
 
     // Call the update-interval
     updateCheckInterval = setInterval(() => {
