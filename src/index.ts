@@ -1,5 +1,5 @@
 import { app, ipcMain, BrowserWindow } from "electron";
-import * as storage from "electron-json-storage"
+import * as storage from "electron-json-storage";
 import { join } from "path";
 import { autoUpdater } from "electron-updater";
 
